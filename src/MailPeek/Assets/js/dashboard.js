@@ -94,6 +94,15 @@ const Dashboard = (() => {
         var items = data.items || [];
         var totalCount = data.totalCount || 0;
 
+        // Update message count badge
+        var badge = document.getElementById('messageCount');
+        if (totalCount > 0) {
+            badge.textContent = totalCount + (totalCount === 1 ? ' message' : ' messages');
+            badge.classList.add('visible');
+        } else {
+            badge.classList.remove('visible');
+        }
+
         tbody.innerHTML = '';
 
         if (items.length === 0) {
