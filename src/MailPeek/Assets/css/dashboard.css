@@ -397,6 +397,13 @@ main {
     overflow: auto;
 }
 
+.empty-placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+    font-family: var(--font);
+    font-size: 0.9rem;
+}
+
 #headersTable {
     width: 100%;
     border-collapse: collapse;

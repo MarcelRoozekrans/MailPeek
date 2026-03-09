@@ -232,7 +232,13 @@ const Dashboard = (() => {
 
             // Text body
             var textPre = document.getElementById('textPreview');
-            textPre.textContent = msg.textBody || '(no text body)';
+            if (msg.textBody) {
+                textPre.textContent = msg.textBody;
+                textPre.classList.remove('empty-placeholder');
+            } else {
+                textPre.textContent = 'No text body';
+                textPre.classList.add('empty-placeholder');
+            }
 
             // Headers table
             var headersTable = document.getElementById('headersTable');
