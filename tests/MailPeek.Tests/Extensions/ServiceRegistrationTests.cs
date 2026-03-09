@@ -27,7 +27,7 @@ public class ServiceRegistrationTests
         Assert.NotNull(store);
 
         var hostedServices = provider.GetServices<IHostedService>();
-        Assert.Contains(hostedServices, s => s.GetType().Name == "MailPeekSmtpHostedService");
+        Assert.Contains(hostedServices, s => string.Equals(s.GetType().Name, "MailPeekSmtpHostedService", StringComparison.Ordinal));
 
         var notifier = provider.GetService<MailPeekHubNotifier>();
         Assert.NotNull(notifier);

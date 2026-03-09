@@ -64,7 +64,9 @@ public class EndToEndTests : IAsyncLifetime
         var store = _host!.Services.GetRequiredService<IMessageStore>();
         var messages = store.GetAll();
 
+#pragma warning disable HLQ005
         Assert.Single(messages);
+#pragma warning restore HLQ005
         Assert.Equal("test@example.com", messages[0].From);
         Assert.Equal("E2E Test", messages[0].Subject);
         Assert.Equal("Hello from E2E test", messages[0].TextBody);

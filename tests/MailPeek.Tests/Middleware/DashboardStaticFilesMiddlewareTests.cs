@@ -1,3 +1,4 @@
+#pragma warning disable MA0074 // xUnit Assert.Contains/DoesNotContain don't have StringComparison overloads
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;

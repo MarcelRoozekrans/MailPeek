@@ -35,7 +35,7 @@ public class MailPeekSmtpHostedService(
         {
             try
             {
-                await _smtpServer.StartAsync(_cts.Token);
+                await _smtpServer.StartAsync(_cts.Token).ConfigureAwait(false);
             }
             catch (OperationCanceledException) { }
             catch (Exception ex)

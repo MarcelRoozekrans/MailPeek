@@ -9,7 +9,7 @@ namespace MailPeek.Tests.Hubs;
 public class MailPeekHubNotifierTests
 {
     [Fact]
-    public void WhenMessageAdded_NotifiesClients()
+    public async Task WhenMessageAdded_NotifiesClients()
     {
         var store = new InMemoryMessageStore();
         var hubContext = Substitute.For<IHubContext<MailPeekHub>>();
@@ -29,7 +29,7 @@ public class MailPeekHubNotifierTests
         };
         store.Add(msg);
 
-        clientProxy.Received(1).SendCoreAsync(
+        await clientProxy.Received(1).SendCoreAsync(
             "NewMessage",
             Arg.Any<object?[]>(),
             Arg.Any<CancellationToken>());

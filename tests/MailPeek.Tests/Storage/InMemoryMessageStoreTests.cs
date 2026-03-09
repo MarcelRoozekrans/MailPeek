@@ -14,8 +14,10 @@ public class InMemoryMessageStoreTests
         _store.Add(msg);
 
         var all = _store.GetAll();
+#pragma warning disable HLQ005
         Assert.Single(all);
-        Assert.Equal("Hello", all.First().Subject);
+#pragma warning restore HLQ005
+        Assert.Equal("Hello", all[0].Subject);
     }
 
     [Fact]
@@ -85,8 +87,8 @@ public class InMemoryMessageStoreTests
 
         var all = _store.GetAll().ToList();
         Assert.Equal(5, all.Count);
-        Assert.DoesNotContain(all, m => m.Subject == "Message 0");
-        Assert.Contains(all, m => m.Subject == "Message 5");
+        Assert.DoesNotContain(all, m => string.Equals(m.Subject, "Message 0", StringComparison.Ordinal));
+        Assert.Contains(all, m => string.Equals(m.Subject, "Message 5", StringComparison.Ordinal));
     }
 
     [Fact]

@@ -11,7 +11,7 @@ public class DashboardStaticFilesMiddleware(
     private static readonly Assembly Assembly = typeof(DashboardStaticFilesMiddleware).Assembly;
     private static readonly string Prefix = "MailPeek.Assets.";
 
-    private static readonly Dictionary<string, string> ContentTypes = new()
+    private static readonly Dictionary<string, string> ContentTypes = new(StringComparer.Ordinal)
     {
         [".html"] = "text/html; charset=utf-8",
         [".css"] = "text/css; charset=utf-8",
@@ -24,28 +24,28 @@ public class DashboardStaticFilesMiddleware(
 
         if (!path.StartsWith(options.PathPrefix, StringComparison.OrdinalIgnoreCase))
         {
-            await next(context);
+            await next(context).ConfigureAwait(false);
             return;
         }
 
         var relativePath = path[options.PathPrefix.Length..].TrimStart('/');
 
         // Serve index.html for the root and message detail routes
-        if (string.IsNullOrEmpty(relativePath) || relativePath.StartsWith("message/"))
+        if (string.IsNullOrEmpty(relativePath) || relativePath.StartsWith("message/", StringComparison.Ordinal))
         {
-            await ServeIndex(context);
+            await ServeIndex(context).ConfigureAwait(false);
             return;
         }
 
         // Serve static assets
-        if (relativePath.StartsWith("assets/"))
+        if (relativePath.StartsWith("assets/", StringComparison.Ordinal))
         {
             var resourcePath = relativePath["assets/".Length..].Replace('/', '.');
-            await ServeEmbeddedResource(context, resourcePath);
+            await ServeEmbeddedResource(context, resourcePath).ConfigureAwait(false);
             return;
         }
 
-        await next(context);
+        await next(context).ConfigureAwait(false);
     }
 
     private async Task ServeIndex(HttpContext context)
@@ -54,12 +54,12 @@ public class DashboardStaticFilesMiddleware(
         if (stream is null) { context.Response.StatusCode = 404; return; }
 
         using var reader = new StreamReader(stream);
-        var html = await reader.ReadToEndAsync();
+        var html = await reader.ReadToEndAsync().ConfigureAwait(false);
         html = html.Replace("{{TITLE}}", options.Title)
                    .Replace("{{PATH_PREFIX}}", options.PathPrefix.TrimEnd('/'));
 
         context.Response.ContentType = "text/html; charset=utf-8";
-        await context.Response.WriteAsync(html);
+        await context.Response.WriteAsync(html).ConfigureAwait(false);
     }
 
     private async Task ServeEmbeddedResource(HttpContext context, string resourcePath)
@@ -70,6 +70,6 @@ public class DashboardStaticFilesMiddleware(
 
         var ext = Path.GetExtension(resourcePath);
         context.Response.ContentType = ContentTypes.GetValueOrDefault(ext, "application/octet-stream");
-        await stream.CopyToAsync(context.Response.Body);
+        await stream.CopyToAsync(context.Response.Body).ConfigureAwait(false);
     }
 }

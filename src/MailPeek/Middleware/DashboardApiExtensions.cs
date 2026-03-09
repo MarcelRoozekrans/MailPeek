@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
@@ -17,14 +18,16 @@ public static class DashboardApiExtensions
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
+#pragma warning disable MA0051
     public static IEndpointRouteBuilder MapMailPeekApi(this IEndpointRouteBuilder endpoints, string pathPrefix)
+#pragma warning restore MA0051
     {
         var api = $"{pathPrefix}/api";
 
         endpoints.MapGet($"{api}/messages", (HttpContext context, IMessageStore store) =>
         {
-            var page = int.TryParse(context.Request.Query["page"], out var p) ? p : 0;
-            var size = int.TryParse(context.Request.Query["size"], out var s) ? s : 50;
+            var page = int.TryParse(context.Request.Query["page"], CultureInfo.InvariantCulture, out var p) ? p : 0;
+            var size = int.TryParse(context.Request.Query["size"], CultureInfo.InvariantCulture, out var s) ? s : 50;
             var search = context.Request.Query["search"].FirstOrDefault();
 
             var result = store.GetPage(page, size, search);
@@ -47,7 +50,7 @@ public static class DashboardApiExtensions
             if (msg is null) { context.Response.StatusCode = 404; return; }
 
             context.Response.ContentType = "text/html; charset=utf-8";
-            await context.Response.WriteAsync(msg.HtmlBody ?? "<em>No HTML body</em>");
+            await context.Response.WriteAsync(msg.HtmlBody ?? "<em>No HTML body</em>").ConfigureAwait(false);
         });
 
         endpoints.MapGet($"{api}/messages/{{id:guid}}/attachments/{{index:int}}", async (Guid id, int index, HttpContext context, IMessageStore store) =>
@@ -62,7 +65,7 @@ public static class DashboardApiExtensions
             var attachment = msg.Attachments[index];
             context.Response.ContentType = attachment.ContentType;
             context.Response.Headers.ContentDisposition = $"attachment; filename=\"{attachment.FileName}\"";
-            await context.Response.Body.WriteAsync(attachment.Content);
+            await context.Response.Body.WriteAsync(attachment.Content).ConfigureAwait(false);
         });
 
         endpoints.MapDelete($"{api}/messages/{{id:guid}}", async (Guid id, IMessageStore store, HttpContext context) =>
@@ -71,7 +74,7 @@ public static class DashboardApiExtensions
             if (!store.Delete(id)) return Results.NotFound();
 
             if (notifier is not null)
-                await notifier.NotifyMessageDeleted(id);
+                await notifier.NotifyMessageDeleted(id).ConfigureAwait(false);
 
             return Results.Ok();
         });
@@ -82,7 +85,7 @@ public static class DashboardApiExtensions
             store.Clear();
 
             if (notifier is not null)
-                await notifier.NotifyMessagesCleared();
+                await notifier.NotifyMessagesCleared().ConfigureAwait(false);
 
             return Results.Ok();
         });

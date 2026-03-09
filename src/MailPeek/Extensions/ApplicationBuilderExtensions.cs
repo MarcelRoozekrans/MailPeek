@@ -35,7 +35,7 @@ public static class ApplicationBuilderExtensions
                     }
                 }
 
-                await next();
+                await next().ConfigureAwait(false);
             });
         }
 

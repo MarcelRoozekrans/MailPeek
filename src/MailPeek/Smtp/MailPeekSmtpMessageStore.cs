@@ -14,7 +14,7 @@ public class MailPeekSmtpMessageStore(MailPeek.Storage.IMessageStore messageStor
         ReadOnlySequence<byte> buffer,
         CancellationToken cancellationToken)
     {
-        await Task.CompletedTask;
+        await Task.CompletedTask.ConfigureAwait(false);
         var raw = buffer.ToArray();
         ParseAndStore(raw);
         return new SmtpLib.Protocol.SmtpResponse(SmtpLib.Protocol.SmtpReplyCode.Ok, "Message saved");
@@ -61,7 +61,7 @@ public class MailPeekSmtpMessageStore(MailPeek.Storage.IMessageStore messageStor
         catch (Exception ex)
         {
             storedMessage.ParseError = true;
-            storedMessage.ParseErrorMessage = ex.Message;
+            storedMessage.ParseErrorMessage = ex.ToString();
         }
 
         messageStore.Add(storedMessage);

@@ -26,8 +26,9 @@ public class MailPeekSmtpMessageStoreTests
         handler.ParseAndStore(raw);
 
         var messages = store.GetAll();
-        Assert.Single(messages);
-        var msg = messages[0];
+#pragma warning disable HLQ005
+        var msg = Assert.Single(messages);
+#pragma warning restore HLQ005
         Assert.Equal("sender@test.com", msg.From);
         Assert.Contains("recipient@test.com", msg.To);
         Assert.Contains("cc@test.com", msg.Cc);
@@ -58,7 +59,7 @@ public class MailPeekSmtpMessageStoreTests
 
         handler.ParseAndStore(stream.ToArray());
 
-        var msg = store.GetAll().Single();
+        var msg = store.GetAll().First();
         Assert.Equal("Plain text", msg.TextBody);
         Assert.Equal("<h1>Hello</h1>", msg.HtmlBody);
     }
@@ -84,9 +85,11 @@ public class MailPeekSmtpMessageStoreTests
 
         handler.ParseAndStore(stream.ToArray());
 
-        var msg = store.GetAll().Single();
+        var msg = store.GetAll().First();
         Assert.True(msg.HasAttachments);
+#pragma warning disable HLQ005
         Assert.Single(msg.Attachments);
+#pragma warning restore HLQ005
         Assert.Equal("test.txt", msg.Attachments[0].FileName);
     }
 
@@ -98,7 +101,7 @@ public class MailPeekSmtpMessageStoreTests
 
         handler.ParseAndStore([0xFF, 0xFE, 0x00]);
 
-        var msg = store.GetAll().Single();
+        var msg = store.GetAll().First();
         Assert.True(msg.ParseError);
         Assert.NotNull(msg.ParseErrorMessage);
         Assert.NotNull(msg.RawMessage);

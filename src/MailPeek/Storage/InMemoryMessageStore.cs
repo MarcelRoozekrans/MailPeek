@@ -7,7 +7,11 @@ public class InMemoryMessageStore(int maxMessages = 1000) : IMessageStore
 {
     private readonly ConcurrentDictionary<Guid, StoredMessage> _messages = new();
     private readonly LinkedList<Guid> _order = new();
+#if NET9_0_OR_GREATER
+    private readonly System.Threading.Lock _orderLock = new();
+#else
     private readonly object _orderLock = new();
+#endif
 
     public event Action<StoredMessage>? OnMessageReceived;
 

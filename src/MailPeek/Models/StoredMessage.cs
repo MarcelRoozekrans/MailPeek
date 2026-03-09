@@ -5,14 +5,14 @@ public class StoredMessage
     public Guid Id { get; set; } = Guid.NewGuid();
     public DateTimeOffset ReceivedAt { get; set; } = DateTimeOffset.UtcNow;
     public string From { get; set; } = string.Empty;
-    public List<string> To { get; set; } = [];
-    public List<string> Cc { get; set; } = [];
-    public List<string> Bcc { get; set; } = [];
+    public IReadOnlyList<string> To { get; set; } = [];
+    public IReadOnlyList<string> Cc { get; set; } = [];
+    public IReadOnlyList<string> Bcc { get; set; } = [];
     public string Subject { get; set; } = string.Empty;
     public string? TextBody { get; set; }
     public string? HtmlBody { get; set; }
-    public List<StoredAttachment> Attachments { get; set; } = [];
-    public Dictionary<string, string> Headers { get; set; } = [];
+    public IList<StoredAttachment> Attachments { get; set; } = [];
+    public IDictionary<string, string> Headers { get; set; } = new Dictionary<string, string>(StringComparer.Ordinal);
     public byte[]? RawMessage { get; set; }
     public bool ParseError { get; set; }
     public string? ParseErrorMessage { get; set; }
