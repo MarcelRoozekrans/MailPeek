@@ -1,0 +1,314 @@
+const Dashboard = (() => {
+    let pathPrefix = '';
+    let currentPage = 0;
+    const pageSize = 25;
+    let connection = null;
+    let searchTimeout = null;
+
+    function init(prefix) {
+        pathPrefix = prefix.replace(/\/+$/, '');
+        setupSignalR();
+        setupEventListeners();
+        loadMessages();
+    }
+
+    // ── SignalR ──────────────────────────────────────────
+    function setupSignalR() {
+        if (typeof signalR === 'undefined') {
+            console.warn('SignalR not loaded, real-time updates disabled.');
+            return;
+        }
+
+        connection = new signalR.HubConnectionBuilder()
+            .withUrl(pathPrefix + '/hub')
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on('NewMessage', function () {
+            loadMessages();
+        });
+
+        connection.on('MessageDeleted', function () {
+            loadMessages();
+        });
+
+        connection.on('MessagesCleared', function () {
+            loadMessages();
+        });
+
+        connection.start().catch(function (err) {
+            console.error('SignalR connection error:', err);
+        });
+    }
+
+    // ── Event Listeners ─────────────────────────────────
+    function setupEventListeners() {
+        var searchInput = document.getElementById('search');
+        searchInput.addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function () {
+                currentPage = 0;
+                loadMessages();
+            }, 300);
+        });
+
+        document.getElementById('clearAll').addEventListener('click', function () {
+            if (confirm('Delete all messages?')) {
+                clearAll();
+            }
+        });
+
+        document.getElementById('backToInbox').addEventListener('click', function () {
+            showInbox();
+        });
+
+        document.querySelectorAll('.tab').forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                switchTab(tab.getAttribute('data-tab'));
+            });
+        });
+    }
+
+    // ── Load Messages ───────────────────────────────────
+    async function loadMessages() {
+        var search = document.getElementById('search').value;
+        try {
+            var response = await fetch(
+                pathPrefix + '/api/messages?page=' + currentPage +
+                '&size=' + pageSize +
+                '&search=' + encodeURIComponent(search)
+            );
+            if (!response.ok) throw new Error('Failed to load messages');
+            var data = await response.json();
+            renderInbox(data);
+        } catch (err) {
+            console.error('Error loading messages:', err);
+        }
+    }
+
+    // ── Render Inbox ────────────────────────────────────
+    function renderInbox(data) {
+        var tbody = document.getElementById('messageBody');
+        var emptyState = document.getElementById('emptyState');
+        var table = document.getElementById('messageTable');
+        var items = data.items || [];
+        var totalCount = data.totalCount || 0;
+
+        tbody.innerHTML = '';
+
+        if (items.length === 0) {
+            table.classList.add('hidden');
+            emptyState.classList.add('visible');
+            document.getElementById('pagination').innerHTML = '';
+            return;
+        }
+
+        table.classList.remove('hidden');
+        emptyState.classList.remove('visible');
+
+        items.forEach(function (msg) {
+            var tr = document.createElement('tr');
+            tr.addEventListener('click', function () {
+                showMessage(msg.id);
+            });
+
+            var tdFrom = document.createElement('td');
+            tdFrom.setAttribute('data-label', 'From');
+            tdFrom.textContent = msg.from || '(unknown)';
+
+            var tdTo = document.createElement('td');
+            tdTo.setAttribute('data-label', 'To');
+            tdTo.textContent = (msg.to || []).join(', ');
+
+            var tdSubject = document.createElement('td');
+            tdSubject.setAttribute('data-label', 'Subject');
+            tdSubject.textContent = msg.subject || '(no subject)';
+
+            var tdDate = document.createElement('td');
+            tdDate.setAttribute('data-label', 'Date');
+            tdDate.textContent = formatDate(msg.receivedAt);
+
+            var tdAttach = document.createElement('td');
+            tdAttach.textContent = msg.hasAttachments ? '\uD83D\uDCCE' : '';
+
+            tr.appendChild(tdFrom);
+            tr.appendChild(tdTo);
+            tr.appendChild(tdSubject);
+            tr.appendChild(tdDate);
+            tr.appendChild(tdAttach);
+
+            tbody.appendChild(tr);
+        });
+
+        renderPagination(totalCount);
+    }
+
+    // ── Pagination ──────────────────────────────────────
+    function renderPagination(totalCount) {
+        var container = document.getElementById('pagination');
+        container.innerHTML = '';
+
+        var totalPages = Math.ceil(totalCount / pageSize);
+        if (totalPages <= 1) return;
+
+        var prev = document.createElement('button');
+        prev.textContent = '\u2190 Prev';
+        prev.disabled = currentPage === 0;
+        prev.addEventListener('click', function () {
+            if (currentPage > 0) {
+                currentPage--;
+                loadMessages();
+            }
+        });
+
+        var info = document.createElement('span');
+        info.className = 'page-info';
+        info.textContent = 'Page ' + (currentPage + 1) + ' of ' + totalPages + ' (' + totalCount + ' messages)';
+
+        var next = document.createElement('button');
+        next.textContent = 'Next \u2192';
+        next.disabled = currentPage >= totalPages - 1;
+        next.addEventListener('click', function () {
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                loadMessages();
+            }
+        });
+
+        container.appendChild(prev);
+        container.appendChild(info);
+        container.appendChild(next);
+    }
+
+    // ── Show Message Detail ─────────────────────────────
+    async function showMessage(id) {
+        try {
+            var response = await fetch(pathPrefix + '/api/messages/' + id);
+            if (!response.ok) throw new Error('Failed to load message');
+            var msg = await response.json();
+
+            document.getElementById('inbox').classList.add('hidden');
+            document.getElementById('messageDetail').classList.remove('hidden');
+
+            // Render header
+            var header = document.getElementById('detailHeader');
+            var subjectHtml = '<div class="detail-subject">' + escapeHtml(msg.subject || '(no subject)') + '</div>';
+            var metaParts = [];
+            metaParts.push('<span><strong>From:</strong> ' + escapeHtml(msg.from || '') + '</span>');
+            metaParts.push('<span><strong>To:</strong> ' + escapeHtml((msg.to || []).join(', ')) + '</span>');
+            if (msg.cc && msg.cc.length > 0) {
+                metaParts.push('<span><strong>Cc:</strong> ' + escapeHtml(msg.cc.join(', ')) + '</span>');
+            }
+            metaParts.push('<span><strong>Date:</strong> ' + formatDate(msg.receivedAt) + '</span>');
+            header.innerHTML = subjectHtml + '<div class="detail-meta">' + metaParts.join('') + '</div>';
+
+            // HTML preview via iframe
+            var iframe = document.getElementById('htmlPreview');
+            iframe.src = pathPrefix + '/api/messages/' + id + '/html';
+
+            // Text body
+            var textPre = document.getElementById('textPreview');
+            textPre.textContent = msg.textBody || '(no text body)';
+
+            // Headers table
+            var headersTable = document.getElementById('headersTable');
+            headersTable.innerHTML = '';
+            var headers = msg.headers || {};
+            Object.keys(headers).forEach(function (key) {
+                var tr = document.createElement('tr');
+                var tdKey = document.createElement('td');
+                tdKey.textContent = key;
+                var tdVal = document.createElement('td');
+                tdVal.textContent = headers[key];
+                tr.appendChild(tdKey);
+                tr.appendChild(tdVal);
+                headersTable.appendChild(tr);
+            });
+
+            // Attachments
+            var attachList = document.getElementById('attachmentsList');
+            attachList.innerHTML = '';
+            var attachments = msg.attachments || [];
+            if (attachments.length === 0) {
+                var li = document.createElement('li');
+                li.textContent = 'No attachments.';
+                attachList.appendChild(li);
+            } else {
+                attachments.forEach(function (att, index) {
+                    var li = document.createElement('li');
+                    var a = document.createElement('a');
+                    a.href = pathPrefix + '/api/messages/' + id + '/attachments/' + index;
+                    a.textContent = att.fileName || 'attachment-' + index;
+                    a.setAttribute('download', att.fileName || 'attachment');
+                    var sizeSpan = document.createElement('span');
+                    sizeSpan.className = 'attachment-size';
+                    sizeSpan.textContent = att.contentType || '';
+                    li.appendChild(a);
+                    li.appendChild(sizeSpan);
+                    attachList.appendChild(li);
+                });
+            }
+
+            // Default to HTML tab
+            switchTab('html');
+        } catch (err) {
+            console.error('Error loading message:', err);
+        }
+    }
+
+    // ── Show Inbox ──────────────────────────────────────
+    function showInbox() {
+        document.getElementById('inbox').classList.remove('hidden');
+        document.getElementById('messageDetail').classList.add('hidden');
+    }
+
+    // ── Tab Switching ───────────────────────────────────
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab').forEach(function (t) {
+            t.classList.toggle('active', t.getAttribute('data-tab') === tabName);
+        });
+        document.querySelectorAll('.tab-panel').forEach(function (p) {
+            p.classList.toggle('active', p.id === 'tab-' + tabName);
+        });
+    }
+
+    // ── Delete Message ──────────────────────────────────
+    async function deleteMessage(id) {
+        try {
+            await fetch(pathPrefix + '/api/messages/' + id, { method: 'DELETE' });
+            showInbox();
+            loadMessages();
+        } catch (err) {
+            console.error('Error deleting message:', err);
+        }
+    }
+
+    // ── Clear All ───────────────────────────────────────
+    async function clearAll() {
+        try {
+            await fetch(pathPrefix + '/api/messages', { method: 'DELETE' });
+            showInbox();
+            loadMessages();
+        } catch (err) {
+            console.error('Error clearing messages:', err);
+        }
+    }
+
+    // ── Helpers ─────────────────────────────────────────
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        try {
+            return new Date(dateStr).toLocaleString();
+        } catch (e) {
+            return dateStr;
+        }
+    }
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    return { init: init };
+})();

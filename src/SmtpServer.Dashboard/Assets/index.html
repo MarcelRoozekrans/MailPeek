@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{TITLE}}</title>
+    <link rel="stylesheet" href="{{PATH_PREFIX}}/assets/css/dashboard.css" />
+</head>
+<body>
+    <header>
+        <h1>{{TITLE}}</h1>
+        <div class="header-actions">
+            <input type="text" id="search" placeholder="Search messages..." />
+            <button id="clearAll" class="btn btn-danger">Clear All</button>
+        </div>
+    </header>
+    <main>
+        <div id="inbox">
+            <table id="messageTable">
+                <thead>
+                    <tr>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Subject</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="messageBody"></tbody>
+            </table>
+            <div id="pagination"></div>
+            <div id="emptyState" class="empty-state">No messages received yet.</div>
+        </div>
+        <div id="messageDetail" class="hidden">
+            <button id="backToInbox" class="btn">&larr; Back</button>
+            <div id="detailHeader"></div>
+            <div class="tabs">
+                <button class="tab active" data-tab="html">HTML</button>
+                <button class="tab" data-tab="text">Text</button>
+                <button class="tab" data-tab="headers">Headers</button>
+                <button class="tab" data-tab="attachments">Attachments</button>
+            </div>
+            <div id="tabContent">
+                <div id="tab-html" class="tab-panel active">
+                    <iframe id="htmlPreview" sandbox="allow-same-origin"></iframe>
+                </div>
+                <div id="tab-text" class="tab-panel"><pre id="textPreview"></pre></div>
+                <div id="tab-headers" class="tab-panel"><table id="headersTable"></table></div>
+                <div id="tab-attachments" class="tab-panel"><ul id="attachmentsList"></ul></div>
+            </div>
+        </div>
+    </main>
+    <script src="{{PATH_PREFIX}}/assets/js/signalr.min.js"></script>
+    <script src="{{PATH_PREFIX}}/assets/js/dashboard.js"></script>
+    <script>Dashboard.init("{{PATH_PREFIX}}");</script>
+</body>
+</html>
