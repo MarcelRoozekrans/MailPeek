@@ -137,14 +137,29 @@ const Dashboard = (() => {
             tdDate.setAttribute('data-label', 'Date');
             tdDate.textContent = formatDate(msg.receivedAt);
 
-            var tdAttach = document.createElement('td');
-            tdAttach.textContent = msg.hasAttachments ? '\uD83D\uDCCE' : '';
+            var tdActions = document.createElement('td');
+            tdActions.setAttribute('data-label', 'Actions');
+            if (msg.hasAttachments) {
+                var attachSpan = document.createElement('span');
+                attachSpan.textContent = '\uD83D\uDCCE ';
+                attachSpan.title = 'Has attachments';
+                tdActions.appendChild(attachSpan);
+            }
+            var delBtn = document.createElement('button');
+            delBtn.className = 'btn-delete-row';
+            delBtn.title = 'Delete';
+            delBtn.textContent = '\u2715';
+            delBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                deleteMessage(msg.id);
+            });
+            tdActions.appendChild(delBtn);
 
             tr.appendChild(tdFrom);
             tr.appendChild(tdTo);
             tr.appendChild(tdSubject);
             tr.appendChild(tdDate);
-            tr.appendChild(tdAttach);
+            tr.appendChild(tdActions);
 
             tbody.appendChild(tr);
         });

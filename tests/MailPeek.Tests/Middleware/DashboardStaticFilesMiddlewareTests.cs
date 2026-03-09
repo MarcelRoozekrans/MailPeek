@@ -51,4 +51,24 @@ public class DashboardStaticFilesMiddlewareTests
         var html = await response.Content.ReadAsStringAsync();
         Assert.Contains("id=\"messageCount\"", html);
     }
+
+    [Fact]
+    public async Task Index_html_contains_delete_column_header()
+    {
+        using var host = await new HostBuilder()
+            .ConfigureWebHost(webBuilder =>
+            {
+                webBuilder.UseTestServer();
+                webBuilder.ConfigureServices(services => services.AddMailPeek());
+                webBuilder.Configure(app => app.UseMailPeek());
+            })
+            .StartAsync();
+
+        var client = host.GetTestServer().CreateClient();
+        var response = await client.GetAsync("/mailpeek");
+
+        var html = await response.Content.ReadAsStringAsync();
+        // The 5th column header should no longer be empty
+        Assert.DoesNotContain("<th></th>", html);
+    }
 }

@@ -161,6 +161,23 @@ header h1 {
     font-size: 0.78rem;
 }
 
+.btn-delete-row {
+    padding: 3px 8px;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    background: none;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+    line-height: 1;
+}
+
+.btn-delete-row:hover {
+    color: var(--danger);
+    background: rgba(239, 68, 68, 0.1);
+}
+
 /* ── Main Content ─────────────────────────────────────── */
 main {
     max-width: 1200px;
@@ -269,6 +286,17 @@ main {
 /* ── Hidden Utility ───────────────────────────────────── */
 .hidden {
     display: none !important;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
 }
 
 /* ── Message Detail ───────────────────────────────────── */
