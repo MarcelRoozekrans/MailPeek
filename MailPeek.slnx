@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/SampleApp/SampleApp.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/MailPeek/MailPeek.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MailPeek.Tests/MailPeek.Tests.csproj" />
+  </Folder>
+</Solution>

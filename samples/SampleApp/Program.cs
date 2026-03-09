@@ -1,8 +1,8 @@
-using SmtpServer.Dashboard.Extensions;
+using MailPeek.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddFakeSmtp(options =>
+builder.Services.AddMailPeek(options =>
 {
     options.Port = 2525;
     options.MaxMessages = 500;
@@ -10,12 +10,12 @@ builder.Services.AddFakeSmtp(options =>
 
 var app = builder.Build();
 
-app.UseFakeSmtpDashboard(options =>
+app.UseMailPeek(options =>
 {
-    options.PathPrefix = "/smtp";
-    options.Title = "Dev Mail Dashboard";
+    options.PathPrefix = "/mailpeek";
+    options.Title = "MailPeek";
 });
 
-app.MapGet("/", () => "Fake SMTP running. Dashboard at /smtp");
+app.MapGet("/", () => "Fake SMTP running. Dashboard at /mailpeek");
 
 app.Run();
