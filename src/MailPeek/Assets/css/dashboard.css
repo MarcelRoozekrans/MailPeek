@@ -491,4 +491,10 @@ main {
         font-size: 0.78rem;
         text-transform: uppercase;
     }
+
+    #messageTable tbody td.col-actions {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 6px;
+    }
 }

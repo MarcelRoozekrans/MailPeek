@@ -138,7 +138,7 @@ const Dashboard = (() => {
             tdDate.textContent = formatDate(msg.receivedAt);
 
             var tdActions = document.createElement('td');
-            tdActions.setAttribute('data-label', 'Actions');
+            tdActions.className = 'col-actions';
             if (msg.hasAttachments) {
                 var attachSpan = document.createElement('span');
                 attachSpan.textContent = '\uD83D\uDCCE ';
