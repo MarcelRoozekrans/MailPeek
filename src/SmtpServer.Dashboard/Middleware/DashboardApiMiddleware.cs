@@ -1,0 +1,92 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using SmtpServer.Dashboard.Hubs;
+using SmtpServer.Dashboard.Storage;
+
+namespace SmtpServer.Dashboard.Middleware;
+
+public static class DashboardApiExtensions
+{
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
+    public static IEndpointRouteBuilder MapDashboardApi(this IEndpointRouteBuilder endpoints, string pathPrefix)
+    {
+        var api = $"{pathPrefix}/api";
+
+        endpoints.MapGet($"{api}/messages", (HttpContext context, IMessageStore store) =>
+        {
+            var page = int.TryParse(context.Request.Query["page"], out var p) ? p : 0;
+            var size = int.TryParse(context.Request.Query["size"], out var s) ? s : 50;
+            var search = context.Request.Query["search"].FirstOrDefault();
+
+            var result = store.GetPage(page, size, search);
+            return Results.Json(new
+            {
+                items = result.Items.Select(m => m.ToSummary()),
+                result.TotalCount
+            }, JsonOptions);
+        });
+
+        endpoints.MapGet($"{api}/messages/{{id:guid}}", (Guid id, IMessageStore store) =>
+        {
+            var msg = store.GetById(id);
+            return msg is null ? Results.NotFound() : Results.Json(msg, JsonOptions);
+        });
+
+        endpoints.MapGet($"{api}/messages/{{id:guid}}/html", async (Guid id, HttpContext context, IMessageStore store) =>
+        {
+            var msg = store.GetById(id);
+            if (msg is null) { context.Response.StatusCode = 404; return; }
+
+            context.Response.ContentType = "text/html; charset=utf-8";
+            await context.Response.WriteAsync(msg.HtmlBody ?? "<em>No HTML body</em>");
+        });
+
+        endpoints.MapGet($"{api}/messages/{{id:guid}}/attachments/{{index:int}}", async (Guid id, int index, HttpContext context, IMessageStore store) =>
+        {
+            var msg = store.GetById(id);
+            if (msg is null || index < 0 || index >= msg.Attachments.Count)
+            {
+                context.Response.StatusCode = 404;
+                return;
+            }
+
+            var attachment = msg.Attachments[index];
+            context.Response.ContentType = attachment.ContentType;
+            context.Response.Headers.ContentDisposition = $"attachment; filename=\"{attachment.FileName}\"";
+            await context.Response.Body.WriteAsync(attachment.Content);
+        });
+
+        endpoints.MapDelete($"{api}/messages/{{id:guid}}", async (Guid id, IMessageStore store, HttpContext context) =>
+        {
+            var notifier = context.RequestServices.GetService<SmtpDashboardHubNotifier>();
+            if (!store.Delete(id)) return Results.NotFound();
+
+            if (notifier is not null)
+                await notifier.NotifyMessageDeleted(id);
+
+            return Results.Ok();
+        });
+
+        endpoints.MapDelete($"{api}/messages", async (IMessageStore store, HttpContext context) =>
+        {
+            var notifier = context.RequestServices.GetService<SmtpDashboardHubNotifier>();
+            store.Clear();
+
+            if (notifier is not null)
+                await notifier.NotifyMessagesCleared();
+
+            return Results.Ok();
+        });
+
+        return endpoints;
+    }
+}
