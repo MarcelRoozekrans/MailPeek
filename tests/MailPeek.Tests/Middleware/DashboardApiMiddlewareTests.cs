@@ -184,4 +184,27 @@ public class DashboardApiMiddlewareTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Empty(_store.GetAll());
     }
+
+    [Fact]
+    public async Task GetLinks_Returns202WhenChecking()
+    {
+        var msg = new StoredMessage { From = "a@b.com", To = ["c@d.com"], Subject = "Test" };
+        _store.Add(msg);
+        var response = await _client!.GetAsync($"/mailpeek/api/messages/{msg.Id}/links");
+        Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetLinks_Returns200WhenComplete()
+    {
+        var msg = new StoredMessage
+        {
+            From = "a@b.com", To = ["c@d.com"], Subject = "Test",
+            LinkCheckComplete = true,
+            LinkCheckResults = [new LinkCheckResult { Url = "https://example.com", Status = LinkStatus.Ok, StatusCode = 200 }]
+        };
+        _store.Add(msg);
+        var response = await _client!.GetAsync($"/mailpeek/api/messages/{msg.Id}/links");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
 }

@@ -19,7 +19,9 @@ public class StoredMessage
     public bool IsRead { get; set; }
 #pragma warning disable MA0016
     public List<string> Tags { get; set; } = [];
+    public List<LinkCheckResult>? LinkCheckResults { get; set; }
 #pragma warning restore MA0016
+    public bool LinkCheckComplete { get; set; }
 
     public bool HasAttachments => Attachments.Count > 0;
 

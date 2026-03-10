@@ -30,6 +30,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IMessageStore>(new InMemoryMessageStore(options.MaxMessages));
         services.AddSingleton<MailPeekHubNotifier>();
         services.AddSingleton<AutoTagger>();
+        services.AddHttpClient("LinkChecker");
+        services.AddSingleton<LinkChecker>();
         services.AddHostedService<MailPeekSmtpHostedService>();
         services.AddSignalR();
 
@@ -70,6 +72,8 @@ public static class ServiceCollectionExtensions
         });
         services.AddSingleton<MailPeekHubNotifier>();
         services.AddSingleton<AutoTagger>();
+        services.AddHttpClient("LinkChecker");
+        services.AddSingleton<LinkChecker>();
         services.AddHostedService<MailPeekSmtpHostedService>();
         services.AddSignalR();
 

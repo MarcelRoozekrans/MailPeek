@@ -326,6 +326,15 @@ const Dashboard = (() => {
                 });
             }
 
+            // Links
+            loadLinks(id);
+            if (connection) {
+                connection.off('LinkCheckComplete');
+                connection.on('LinkCheckComplete', function (completedId) {
+                    if (completedId === id) loadLinks(id);
+                });
+            }
+
             // Default to HTML tab
             switchTab('html');
         } catch (err) {
@@ -401,6 +410,54 @@ const Dashboard = (() => {
         var div = document.createElement('div');
         div.appendChild(document.createTextNode(str));
         return div.innerHTML;
+    }
+
+    // ── Load Links ───────────────────────────────────────
+    async function loadLinks(id) {
+        var statusEl = document.getElementById('linksStatus');
+        var tableEl = document.getElementById('linksTable');
+        var tbody = document.getElementById('linksBody');
+        try {
+            var response = await fetch(pathPrefix + '/api/messages/' + id + '/links');
+            if (response.status === 202) {
+                statusEl.textContent = 'Checking links...';
+                statusEl.classList.remove('hidden');
+                tableEl.classList.add('hidden');
+                return;
+            }
+            var links = await response.json();
+            statusEl.classList.add('hidden');
+            tbody.innerHTML = '';
+            if (!links || links.length === 0) {
+                statusEl.textContent = 'No links found.';
+                statusEl.classList.remove('hidden');
+                tableEl.classList.add('hidden');
+                return;
+            }
+            tableEl.classList.remove('hidden');
+            links.forEach(function (link) {
+                var tr = document.createElement('tr');
+                var tdUrl = document.createElement('td');
+                var a = document.createElement('a');
+                a.href = link.url;
+                a.textContent = link.url;
+                a.target = '_blank';
+                a.rel = 'noopener';
+                tdUrl.appendChild(a);
+                var tdStatus = document.createElement('td');
+                var statusText = link.statusCode ? link.status + ' (' + link.statusCode + ')' : link.status;
+                var statusSpan = document.createElement('span');
+                var statusClass = String(link.status).toLowerCase();
+                statusSpan.className = 'link-status link-status-' + statusClass;
+                statusSpan.textContent = statusText;
+                tdStatus.appendChild(statusSpan);
+                tr.appendChild(tdUrl);
+                tr.appendChild(tdStatus);
+                tbody.appendChild(tr);
+            });
+        } catch (err) {
+            console.error('Error loading links:', err);
+        }
     }
 
     return { init: init };

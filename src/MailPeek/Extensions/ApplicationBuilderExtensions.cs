@@ -58,6 +58,9 @@ public static class ApplicationBuilderExtensions
         var autoTagger = app.ApplicationServices.GetRequiredService<AutoTagger>();
         autoTagger.Start();
 
+        var linkChecker = app.ApplicationServices.GetRequiredService<LinkChecker>();
+        linkChecker.Start();
+
         return app;
     }
 }
