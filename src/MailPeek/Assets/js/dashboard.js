@@ -5,6 +5,9 @@ const Dashboard = (() => {
     let connection = null;
     let searchTimeout = null;
     let currentTag = null;
+    let selectedIds = new Set();
+    let currentSort = 'date';
+    let sortDescending = true;
 
     function init(prefix) {
         pathPrefix = prefix.replace(/\/+$/, '');
@@ -52,6 +55,10 @@ const Dashboard = (() => {
             loadMessages();
         });
 
+        connection.on('MessagesDeleted', function () {
+            loadMessages();
+        });
+
         connection.start().catch(function (err) {
             console.error('SignalR connection error:', err);
         });
@@ -83,15 +90,48 @@ const Dashboard = (() => {
                 switchTab(tab.getAttribute('data-tab'));
             });
         });
+
+        // Select all checkbox
+        document.getElementById('selectAll').addEventListener('change', function (e) {
+            var checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(function (cb) {
+                cb.checked = e.target.checked;
+                var tr = cb.closest('tr');
+                var id = tr.getAttribute('data-id');
+                if (e.target.checked) {
+                    selectedIds.add(id);
+                    tr.classList.add('selected');
+                } else {
+                    selectedIds.delete(id);
+                    tr.classList.remove('selected');
+                }
+            });
+            updateBulkBar();
+        });
+
+        // Bulk bar buttons
+        document.getElementById('bulkDelete').addEventListener('click', bulkDelete);
+        document.getElementById('bulkClear').addEventListener('click', clearSelection);
+
+        // Sortable column headers
+        document.querySelectorAll('#messageTable thead th.sortable').forEach(function (th) {
+            th.addEventListener('click', function () {
+                setSort(th.getAttribute('data-sort'));
+            });
+        });
     }
 
     // ── Load Messages ───────────────────────────────────
     async function loadMessages() {
+        selectedIds.clear();
         var search = document.getElementById('search').value;
         try {
             var url = pathPrefix + '/api/messages?page=' + currentPage + '&size=' + pageSize + '&search=' + encodeURIComponent(search);
             if (currentTag) {
                 url += '&tag=' + encodeURIComponent(currentTag);
+            }
+            if (currentSort) {
+                url += '&sortBy=' + currentSort + '&sortDesc=' + sortDescending;
             }
             var response = await fetch(url);
             if (!response.ok) throw new Error('Failed to load messages');
@@ -136,12 +176,35 @@ const Dashboard = (() => {
 
         items.forEach(function (msg) {
             var tr = document.createElement('tr');
+            tr.setAttribute('data-id', msg.id);
             if (!msg.isRead) {
                 tr.classList.add('unread');
             }
             tr.addEventListener('click', function () {
                 showMessage(msg.id);
             });
+
+            var tdCheck = document.createElement('td');
+            tdCheck.className = 'col-checkbox';
+            var checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'row-checkbox';
+            checkbox.checked = selectedIds.has(msg.id);
+            checkbox.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+            checkbox.addEventListener('change', function (e) {
+                if (e.target.checked) {
+                    selectedIds.add(msg.id);
+                    tr.classList.add('selected');
+                } else {
+                    selectedIds.delete(msg.id);
+                    tr.classList.remove('selected');
+                }
+                updateBulkBar();
+                updateSelectAll();
+            });
+            tdCheck.appendChild(checkbox);
 
             var tdFrom = document.createElement('td');
             tdFrom.setAttribute('data-label', 'From');
@@ -191,6 +254,7 @@ const Dashboard = (() => {
             });
             tdActions.appendChild(delBtn);
 
+            tr.appendChild(tdCheck);
             tr.appendChild(tdFrom);
             tr.appendChild(tdTo);
             tr.appendChild(tdSubject);
@@ -201,6 +265,8 @@ const Dashboard = (() => {
         });
 
         renderPagination(totalCount);
+        updateSelectAll();
+        updateBulkBar();
     }
 
     // ── Pagination ──────────────────────────────────────
@@ -458,6 +524,90 @@ const Dashboard = (() => {
         } catch (err) {
             console.error('Error loading links:', err);
         }
+    }
+
+    // ── Bulk Operations ──────────────────────────────────
+    function updateBulkBar() {
+        var bar = document.getElementById('bulkBar');
+        var count = document.getElementById('bulkCount');
+        if (selectedIds.size > 0) {
+            bar.classList.remove('hidden');
+            bar.classList.add('visible');
+            count.textContent = selectedIds.size + ' selected';
+        } else {
+            bar.classList.add('hidden');
+            bar.classList.remove('visible');
+        }
+    }
+
+    function updateSelectAll() {
+        var selectAll = document.getElementById('selectAll');
+        var checkboxes = document.querySelectorAll('.row-checkbox');
+        if (checkboxes.length === 0) {
+            selectAll.checked = false;
+            selectAll.indeterminate = false;
+            return;
+        }
+        var checkedCount = selectedIds.size;
+        selectAll.checked = checkedCount === checkboxes.length && checkedCount > 0;
+        selectAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+    }
+
+    async function bulkDelete() {
+        if (selectedIds.size === 0) return;
+        if (!confirm('Delete ' + selectedIds.size + ' message(s)?')) return;
+        try {
+            var response = await fetch(pathPrefix + '/api/messages/bulk', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids: Array.from(selectedIds) })
+            });
+            if (!response.ok) throw new Error('Bulk delete failed');
+            selectedIds.clear();
+            loadMessages();
+        } catch (err) {
+            console.error('Error during bulk delete:', err);
+        }
+    }
+
+    function clearSelection() {
+        selectedIds.clear();
+        document.querySelectorAll('.row-checkbox').forEach(function (cb) { cb.checked = false; });
+        document.querySelectorAll('#messageTable tbody tr.selected').forEach(function (tr) { tr.classList.remove('selected'); });
+        updateBulkBar();
+        updateSelectAll();
+    }
+
+    // ── Sorting ──────────────────────────────────────────
+    function setSort(field) {
+        if (currentSort === field) {
+            sortDescending = !sortDescending;
+        } else {
+            currentSort = field;
+            sortDescending = true;
+        }
+        currentPage = 0;
+        updateSortHeaders();
+        loadMessages();
+    }
+
+    function updateSortHeaders() {
+        document.querySelectorAll('#messageTable thead th.sortable').forEach(function (th) {
+            var field = th.getAttribute('data-sort');
+            var arrow = th.querySelector('.sort-arrow');
+            if (field === currentSort) {
+                th.classList.add('active');
+                if (!arrow) {
+                    arrow = document.createElement('span');
+                    arrow.className = 'sort-arrow';
+                    th.appendChild(arrow);
+                }
+                arrow.innerHTML = sortDescending ? '&#9660;' : '&#9650;';
+            } else {
+                th.classList.remove('active');
+                if (arrow) arrow.remove();
+            }
+        });
     }
 
     return { init: init };
