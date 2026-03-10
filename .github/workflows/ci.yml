@@ -29,7 +29,7 @@ jobs:
       - name: Run GitVersion
         id: gitversion
         run: |
-          VERSION=$(dotnet gitversion /showvariable NuGetVersionV2)
+          VERSION=$(dotnet gitversion /showvariable SemVer)
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Package version: $VERSION"
 
