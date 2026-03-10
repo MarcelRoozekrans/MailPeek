@@ -10,6 +10,10 @@ const Dashboard = (() => {
         setupSignalR();
         setupEventListeners();
         loadMessages();
+
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
     }
 
     // ── SignalR ──────────────────────────────────────────
@@ -24,8 +28,19 @@ const Dashboard = (() => {
             .withAutomaticReconnect()
             .build();
 
-        connection.on('NewMessage', function () {
+        connection.on('NewMessage', function (summary) {
             loadMessages();
+            if ('Notification' in window && Notification.permission === 'granted') {
+                var n = new Notification(summary.subject || '(no subject)', {
+                    body: 'From: ' + (summary.from || 'unknown'),
+                    tag: summary.id
+                });
+                n.onclick = function () {
+                    window.focus();
+                    showMessage(summary.id);
+                    n.close();
+                };
+            }
         });
 
         connection.on('MessageDeleted', function () {
@@ -96,8 +111,11 @@ const Dashboard = (() => {
 
         // Update message count badge
         var badge = document.getElementById('messageCount');
+        var unreadCount = data.unreadCount || 0;
         if (totalCount > 0) {
-            badge.textContent = totalCount + (totalCount === 1 ? ' message' : ' messages');
+            badge.textContent = unreadCount > 0
+                ? unreadCount + ' / ' + totalCount
+                : totalCount + (totalCount === 1 ? ' message' : ' messages');
             badge.classList.add('visible');
         } else {
             badge.classList.remove('visible');
@@ -117,6 +135,9 @@ const Dashboard = (() => {
 
         items.forEach(function (msg) {
             var tr = document.createElement('tr');
+            if (!msg.isRead) {
+                tr.classList.add('unread');
+            }
             tr.addEventListener('click', function () {
                 showMessage(msg.id);
             });
@@ -211,6 +232,11 @@ const Dashboard = (() => {
             if (!response.ok) throw new Error('Failed to load message');
             var msg = await response.json();
 
+            if (!msg.isRead) {
+                fetch(pathPrefix + '/api/messages/' + id + '/read', { method: 'PUT' })
+                    .catch(function(err) { console.error('Failed to mark as read:', err); });
+            }
+
             document.getElementById('inbox').classList.add('hidden');
             document.getElementById('messageDetail').classList.remove('hidden');
 
@@ -290,6 +316,7 @@ const Dashboard = (() => {
     function showInbox() {
         document.getElementById('inbox').classList.remove('hidden');
         document.getElementById('messageDetail').classList.add('hidden');
+        loadMessages();
     }
 
     // ── Tab Switching ───────────────────────────────────

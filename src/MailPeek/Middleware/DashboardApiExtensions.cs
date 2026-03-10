@@ -31,10 +31,13 @@ public static class DashboardApiExtensions
             var search = context.Request.Query["search"].FirstOrDefault();
 
             var result = store.GetPage(page, size, search);
+            var allMessages = store.GetAll();
+            var unreadCount = allMessages.Count(m => !m.IsRead);
             return Results.Json(new
             {
                 items = result.Items.Select(m => m.ToSummary()),
-                result.TotalCount
+                result.TotalCount,
+                unreadCount
             }, JsonOptions);
         });
 

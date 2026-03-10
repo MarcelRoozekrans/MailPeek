@@ -235,6 +235,22 @@ main {
     width: 40px;
 }
 
+/* ── Unread Indicator ────────────────────────────────────── */
+#messageTable tbody tr.unread td {
+    font-weight: 600;
+}
+
+#messageTable tbody tr.unread td:first-child::after {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
 /* ── Pagination ───────────────────────────────────────── */
 #pagination {
     display: flex;
