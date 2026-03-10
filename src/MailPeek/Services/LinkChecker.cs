@@ -38,7 +38,9 @@ public partial class LinkChecker(
         using var client = httpClientFactory.CreateClient("LinkChecker");
         client.Timeout = RequestTimeout;
 
+#pragma warning disable HLQ012 // Cannot use CollectionsMarshal.AsSpan with async foreach
         foreach (var url in urls)
+#pragma warning restore HLQ012
         {
             var result = new LinkCheckResult { Url = url };
             try

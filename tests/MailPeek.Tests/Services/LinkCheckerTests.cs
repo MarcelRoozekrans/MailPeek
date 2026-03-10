@@ -38,7 +38,9 @@ public class LinkCheckerTests
             HtmlBody = "<a href=\"https://example.com\">Link</a>",
             TextBody = "Visit https://example.com"
         };
+#pragma warning disable HLQ005 // False positive on Assert.Single
         Assert.Single(LinkChecker.ExtractUrls(msg));
+#pragma warning restore HLQ005
     }
 
     [Fact]
