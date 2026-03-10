@@ -82,6 +82,33 @@ public static class DashboardApiExtensions
             return Results.Ok();
         });
 
+        endpoints.MapDelete($"{api}/messages/bulk", async (HttpContext context, IMessageStore store) =>
+        {
+            var notifier = context.RequestServices.GetService<MailPeekHubNotifier>();
+            BulkDeleteRequest? body;
+            try
+            {
+                body = await context.Request.ReadFromJsonAsync<BulkDeleteRequest>().ConfigureAwait(false);
+            }
+            catch (InvalidOperationException)
+            {
+                return Results.BadRequest();
+            }
+            catch (JsonException)
+            {
+                return Results.BadRequest();
+            }
+
+            if (body?.Ids is null || body.Ids.Count == 0) return Results.BadRequest();
+
+            var deleted = store.DeleteMany(body.Ids);
+
+            if (notifier is not null)
+                await notifier.NotifyMessagesDeleted(body.Ids).ConfigureAwait(false);
+
+            return Results.Json(new { deleted }, JsonOptions);
+        });
+
         endpoints.MapDelete($"{api}/messages", async (IMessageStore store, HttpContext context) =>
         {
             var notifier = context.RequestServices.GetService<MailPeekHubNotifier>();
@@ -116,4 +143,6 @@ public static class DashboardApiExtensions
 
         return endpoints;
     }
+
+    private sealed record BulkDeleteRequest(List<Guid> Ids);
 }
