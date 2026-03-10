@@ -61,6 +61,9 @@ public static class ApplicationBuilderExtensions
         var linkChecker = app.ApplicationServices.GetRequiredService<LinkChecker>();
         linkChecker.Start();
 
+        var webhookNotifier = app.ApplicationServices.GetRequiredService<WebhookNotifier>();
+        webhookNotifier.Start();
+
         return app;
     }
 }

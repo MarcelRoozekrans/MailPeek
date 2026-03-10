@@ -25,6 +25,7 @@ public static class ServiceCollectionExtensions
             opts.MaxMessages = options.MaxMessages;
             opts.MaxMessageSize = options.MaxMessageSize;
             opts.AutoTagPlusAddressing = options.AutoTagPlusAddressing;
+            opts.WebhookUrl = options.WebhookUrl;
         });
 
         services.AddSingleton<IMessageStore>(new InMemoryMessageStore(options.MaxMessages));
@@ -32,6 +33,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<AutoTagger>();
         services.AddHttpClient("LinkChecker");
         services.AddSingleton<LinkChecker>();
+        services.AddHttpClient("Webhook");
+        services.AddSingleton<WebhookNotifier>();
         services.AddHostedService<MailPeekSmtpHostedService>();
         services.AddSignalR();
 
@@ -74,6 +77,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<AutoTagger>();
         services.AddHttpClient("LinkChecker");
         services.AddSingleton<LinkChecker>();
+        services.AddHttpClient("Webhook");
+        services.AddSingleton<WebhookNotifier>();
         services.AddHostedService<MailPeekSmtpHostedService>();
         services.AddSignalR();
 

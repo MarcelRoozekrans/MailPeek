@@ -7,4 +7,5 @@ public class MailPeekSmtpOptions
     public int MaxMessages { get; set; } = 1000;
     public long MaxMessageSize { get; set; } = 10_000_000;
     public bool AutoTagPlusAddressing { get; set; } = true;
+    public string? WebhookUrl { get; set; }
 }
