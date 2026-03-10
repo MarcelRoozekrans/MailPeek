@@ -43,7 +43,8 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddMailPeek(
         this IServiceCollection services,
-        string connectionName)
+        string connectionName,
+        Action<MailPeekSmtpOptions>? configureOptions = null)
     {
         services.AddSingleton<IConfigureOptions<MailPeekSmtpOptions>>(sp =>
         {
@@ -65,6 +66,7 @@ public static class ServiceCollectionExtensions
             {
                 opts.Hostname = hostname;
                 opts.Port = port;
+                configureOptions?.Invoke(opts);
             });
         });
 
