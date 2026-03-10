@@ -68,6 +68,46 @@ public class InMemoryMessageStoreTests
     }
 
     [Fact]
+    public void DeleteMany_RemovesMultipleMessages()
+    {
+        var msg1 = CreateMessage("a@test.com", "First");
+        var msg2 = CreateMessage("b@test.com", "Second");
+        var msg3 = CreateMessage("c@test.com", "Third");
+        _store.Add(msg1);
+        _store.Add(msg2);
+        _store.Add(msg3);
+
+        var deleted = _store.DeleteMany([msg1.Id, msg3.Id]);
+        Assert.Equal(2, deleted);
+#pragma warning disable HLQ005
+        var remaining = Assert.Single(_store.GetAll());
+#pragma warning restore HLQ005
+        Assert.Equal("Second", remaining.Subject);
+    }
+
+    [Fact]
+    public void DeleteMany_IgnoresMissingIds()
+    {
+        var msg = CreateMessage("a@test.com", "First");
+        _store.Add(msg);
+
+        var deleted = _store.DeleteMany([msg.Id, Guid.NewGuid()]);
+        Assert.Equal(1, deleted);
+        Assert.Empty(_store.GetAll());
+    }
+
+    [Fact]
+    public void DeleteMany_ReturnsZeroForEmptyList()
+    {
+        _store.Add(CreateMessage("a@test.com", "First"));
+        var deleted = _store.DeleteMany([]);
+        Assert.Equal(0, deleted);
+#pragma warning disable HLQ005
+        Assert.Single(_store.GetAll());
+#pragma warning restore HLQ005
+    }
+
+    [Fact]
     public void Clear_RemovesAllMessages()
     {
         _store.Add(CreateMessage("a@test.com", "First"));

@@ -8,6 +8,7 @@ public interface IMessageStore
     IReadOnlyList<StoredMessage> GetAll();
     StoredMessage? GetById(Guid id);
     bool Delete(Guid id);
+    int DeleteMany(IReadOnlyList<Guid> ids);
     bool MarkAsRead(Guid id);
     bool SetTags(Guid id, IList<string> tags);
     void Clear();

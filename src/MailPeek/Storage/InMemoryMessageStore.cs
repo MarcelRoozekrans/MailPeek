@@ -61,6 +61,24 @@ public class InMemoryMessageStore(int maxMessages = 1000) : IMessageStore
         return true;
     }
 
+    public int DeleteMany(IReadOnlyList<Guid> ids)
+    {
+        var count = 0;
+        lock (_orderLock)
+        {
+            foreach (var id in ids)
+            {
+                if (_messages.TryRemove(id, out _))
+                {
+                    _order.Remove(id);
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
     public bool MarkAsRead(Guid id)
     {
         if (!_messages.TryGetValue(id, out var message))
