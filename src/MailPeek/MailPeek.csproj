@@ -7,6 +7,19 @@
     <RootNamespace>MailPeek</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PackageId>MailPeek</PackageId>
+    <Authors>Marcel Roozekrans</Authors>
+    <Description>In-memory fake SMTP server with a real-time web dashboard for ASP.NET Core. Capture emails during development and testing — no external mail server needed.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/MarcelRoozekrans/MailPeek</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MarcelRoozekrans/MailPeek.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>smtp;email;testing;development;fake-smtp;mailpeek;aspnetcore</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
+  </PropertyGroup>
+
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
@@ -45,6 +58,11 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Assets\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
