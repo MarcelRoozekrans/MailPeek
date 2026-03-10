@@ -206,6 +206,65 @@ public class InMemoryMessageStoreTests
         Assert.Equal("Tagged", page.Items[0].Subject);
     }
 
+    [Fact]
+    public void GetPage_SortsByFromAscending()
+    {
+        var store = new InMemoryMessageStore(maxMessages: 20);
+        store.Add(CreateMessage("charlie@test.com", "C"));
+        store.Add(CreateMessage("alice@test.com", "A"));
+        store.Add(CreateMessage("bob@test.com", "B"));
+
+        var page = store.GetPage(0, 10, sortBy: "from", sortDescending: false);
+        Assert.Equal("alice@test.com", page.Items[0].From);
+        Assert.Equal("bob@test.com", page.Items[1].From);
+        Assert.Equal("charlie@test.com", page.Items[2].From);
+    }
+
+    [Fact]
+    public void GetPage_SortsBySubjectDescending()
+    {
+        var store = new InMemoryMessageStore(maxMessages: 20);
+        store.Add(CreateMessage("a@test.com", "Alpha"));
+        store.Add(CreateMessage("b@test.com", "Charlie"));
+        store.Add(CreateMessage("c@test.com", "Bravo"));
+
+        var page = store.GetPage(0, 10, sortBy: "subject", sortDescending: true);
+        Assert.Equal("Charlie", page.Items[0].Subject);
+        Assert.Equal("Bravo", page.Items[1].Subject);
+        Assert.Equal("Alpha", page.Items[2].Subject);
+    }
+
+    [Fact]
+    public void GetPage_SortsByDateAscending()
+    {
+        var store = new InMemoryMessageStore(maxMessages: 20);
+        var msg1 = CreateMessage("a@test.com", "Old");
+        msg1.ReceivedAt = new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        var msg2 = CreateMessage("b@test.com", "New");
+        msg2.ReceivedAt = new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero);
+        store.Add(msg1);
+        store.Add(msg2);
+
+        var page = store.GetPage(0, 10, sortBy: "date", sortDescending: false);
+        Assert.Equal("Old", page.Items[0].Subject);
+        Assert.Equal("New", page.Items[1].Subject);
+    }
+
+    [Fact]
+    public void GetPage_DefaultSortIsDateDescending()
+    {
+        var store = new InMemoryMessageStore(maxMessages: 20);
+        var msg1 = CreateMessage("a@test.com", "Old");
+        msg1.ReceivedAt = new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        var msg2 = CreateMessage("b@test.com", "New");
+        msg2.ReceivedAt = new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero);
+        store.Add(msg1);
+        store.Add(msg2);
+
+        var page = store.GetPage(0, 10);
+        Assert.Equal("New", page.Items[0].Subject);
+    }
+
     private static StoredMessage CreateMessage(string from, string subject) => new()
     {
         From = from,
