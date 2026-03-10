@@ -4,6 +4,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/MailPeek/MailPeek.csproj" />
+    <Project Path="src/MailPeek.Hosting.Aspire/MailPeek.Hosting.Aspire.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/MailPeek.Tests/MailPeek.Tests.csproj" />
