@@ -9,8 +9,9 @@ public interface IMessageStore
     StoredMessage? GetById(Guid id);
     bool Delete(Guid id);
     bool MarkAsRead(Guid id);
+    bool SetTags(Guid id, IList<string> tags);
     void Clear();
-    PagedResult<StoredMessage> GetPage(int pageNumber, int pageSize, string? searchTerm = null);
+    PagedResult<StoredMessage> GetPage(int pageNumber, int pageSize, string? searchTerm = null, string? tag = null);
 #pragma warning disable MA0046
     event Action<StoredMessage>? OnMessageReceived;
 #pragma warning restore MA0046

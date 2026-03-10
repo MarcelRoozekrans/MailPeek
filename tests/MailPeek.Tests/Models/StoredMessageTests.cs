@@ -51,6 +51,21 @@ public class StoredMessageTests
     }
 
     [Fact]
+    public void Tags_DefaultsEmpty()
+    {
+        var msg = new StoredMessage();
+        Assert.Empty(msg.Tags);
+    }
+
+    [Fact]
+    public void ToSummary_IncludesTags()
+    {
+        var msg = new StoredMessage { Tags = ["welcome", "signup"] };
+        var summary = msg.ToSummary();
+        Assert.Equal(["welcome", "signup"], summary.Tags);
+    }
+
+    [Fact]
     public void ToSummary_MapsCorrectly()
     {
         var msg = new StoredMessage

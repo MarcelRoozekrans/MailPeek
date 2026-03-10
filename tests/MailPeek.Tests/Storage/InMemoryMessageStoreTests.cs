@@ -134,6 +134,38 @@ public class InMemoryMessageStoreTests
         Assert.False(_store.MarkAsRead(Guid.NewGuid()));
     }
 
+    [Fact]
+    public void SetTags_UpdatesMessageTags()
+    {
+        var msg = CreateMessage("test@example.com", "Hello");
+        _store.Add(msg);
+        var result = _store.SetTags(msg.Id, ["welcome", "test"]);
+        Assert.True(result);
+        Assert.Equal(["welcome", "test"], _store.GetById(msg.Id)!.Tags);
+    }
+
+    [Fact]
+    public void SetTags_ReturnsFalseForMissing()
+    {
+        Assert.False(_store.SetTags(Guid.NewGuid(), ["tag"]));
+    }
+
+    [Fact]
+    public void GetPage_FiltersByTag()
+    {
+        var store = new InMemoryMessageStore(maxMessages: 20);
+        var msg1 = CreateMessage("a@test.com", "Tagged");
+        var msg2 = CreateMessage("b@test.com", "Untagged");
+        store.Add(msg1);
+        store.Add(msg2);
+        store.SetTags(msg1.Id, ["welcome"]);
+        var page = store.GetPage(0, 50, tag: "welcome");
+#pragma warning disable HLQ005
+        Assert.Single(page.Items);
+#pragma warning restore HLQ005
+        Assert.Equal("Tagged", page.Items[0].Subject);
+    }
+
     private static StoredMessage CreateMessage(string from, string subject) => new()
     {
         From = from,

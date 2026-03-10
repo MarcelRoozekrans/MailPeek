@@ -69,6 +69,14 @@ public class InMemoryMessageStore(int maxMessages = 1000) : IMessageStore
         return true;
     }
 
+    public bool SetTags(Guid id, IList<string> tags)
+    {
+        if (!_messages.TryGetValue(id, out var message))
+            return false;
+        message.Tags = [.. tags];
+        return true;
+    }
+
     public void Clear()
     {
         lock (_orderLock)
@@ -79,7 +87,7 @@ public class InMemoryMessageStore(int maxMessages = 1000) : IMessageStore
         _messages.Clear();
     }
 
-    public PagedResult<StoredMessage> GetPage(int pageNumber, int pageSize, string? searchTerm = null)
+    public PagedResult<StoredMessage> GetPage(int pageNumber, int pageSize, string? searchTerm = null, string? tag = null)
     {
         var all = GetAll();
 
@@ -87,10 +95,15 @@ public class InMemoryMessageStore(int maxMessages = 1000) : IMessageStore
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             var term = searchTerm.ToLowerInvariant();
-            filtered = all.Where(m =>
+            filtered = filtered.Where(m =>
                 m.Subject.Contains(term, StringComparison.OrdinalIgnoreCase) ||
                 m.From.Contains(term, StringComparison.OrdinalIgnoreCase) ||
                 m.To.Any(t => t.Contains(term, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        if (!string.IsNullOrWhiteSpace(tag))
+        {
+            filtered = filtered.Where(m => m.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase));
         }
 
         var list = filtered.ToList();

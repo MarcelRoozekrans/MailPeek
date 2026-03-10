@@ -17,6 +17,9 @@ public class StoredMessage
     public bool ParseError { get; set; }
     public string? ParseErrorMessage { get; set; }
     public bool IsRead { get; set; }
+#pragma warning disable MA0016
+    public List<string> Tags { get; set; } = [];
+#pragma warning restore MA0016
 
     public bool HasAttachments => Attachments.Count > 0;
 
@@ -28,6 +31,7 @@ public class StoredMessage
         Subject = Subject,
         HasAttachments = HasAttachments,
         ReceivedAt = ReceivedAt,
-        IsRead = IsRead
+        IsRead = IsRead,
+        Tags = Tags
     };
 }

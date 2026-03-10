@@ -29,8 +29,9 @@ public static class DashboardApiExtensions
             var page = int.TryParse(context.Request.Query["page"], CultureInfo.InvariantCulture, out var p) ? p : 0;
             var size = int.TryParse(context.Request.Query["size"], CultureInfo.InvariantCulture, out var s) ? s : 50;
             var search = context.Request.Query["search"].FirstOrDefault();
+            var tag = context.Request.Query["tag"].FirstOrDefault();
 
-            var result = store.GetPage(page, size, search);
+            var result = store.GetPage(page, size, search, tag);
             var allMessages = store.GetAll();
             var unreadCount = allMessages.Count(m => !m.IsRead);
             return Results.Json(new
@@ -96,6 +97,13 @@ public static class DashboardApiExtensions
         endpoints.MapPut($"{api}/messages/{{id:guid}}/read", (Guid id, IMessageStore store) =>
         {
             return store.MarkAsRead(id) ? Results.Ok() : Results.NotFound();
+        });
+
+        endpoints.MapPut($"{api}/messages/{{id:guid}}/tags", async (Guid id, HttpContext context, IMessageStore store) =>
+        {
+            var tags = await context.Request.ReadFromJsonAsync<List<string>>().ConfigureAwait(false);
+            if (tags is null) return Results.BadRequest();
+            return store.SetTags(id, tags) ? Results.Ok() : Results.NotFound();
         });
 
         return endpoints;
