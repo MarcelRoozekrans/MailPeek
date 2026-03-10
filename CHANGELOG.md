@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.3.0](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.2.0...v0.3.0) (2026-03-10)
+
+
+### Features
+
+* add IsRead property and PUT /api/messages/{id}/read endpoint ([ec85868](https://github.com/MarcelRoozekrans/MailPeek/commit/ec85868b2ccbdbdfdddf50e61e2156ea17fc0329))
+* add link checking service, API, and Links tab UI ([4349c26](https://github.com/MarcelRoozekrans/MailPeek/commit/4349c2612623459d6415fb0df958a5f9b81590f9))
+* add plus-addressing auto-tagging and tag pills UI ([e371c45](https://github.com/MarcelRoozekrans/MailPeek/commit/e371c450fcea038bc24fa3c8fcd07d5293b00df5))
+* add read/unread UI and browser notifications ([9c307b9](https://github.com/MarcelRoozekrans/MailPeek/commit/9c307b93bc754f7fe53121e6bebe9ef9c1918a82))
+* add read/unread, notifications, tagging, link checking, and webhooks ([7b522b4](https://github.com/MarcelRoozekrans/MailPeek/commit/7b522b4b574b566c39258a3bb97b924850a3c744))
+* add Tags to models, SetTags to store, and tag API endpoints ([0890545](https://github.com/MarcelRoozekrans/MailPeek/commit/08905457078f8672e76bafde1448a7f970a92fbb))
+* add webhook support with fire-and-forget notifications ([3320dfe](https://github.com/MarcelRoozekrans/MailPeek/commit/3320dfecfb5b239f7058dbdbbdae5be727944163))
+
+
+### Bug Fixes
+
+* allow configuring new options in connection-string AddMailPeek overload ([ea3693f](https://github.com/MarcelRoozekrans/MailPeek/commit/ea3693fde625b38c8a6883c1109e23ca464f4dfa))
+
 ## [0.2.0](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.1.0...v0.2.0) (2026-03-10)
 
 
