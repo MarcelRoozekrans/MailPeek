@@ -77,6 +77,9 @@ public class InMemoryMessageStore(int maxMessages = 1000) : IMessageStore
         return true;
     }
 
+    public int GetUnreadCount() =>
+        _messages.Values.Count(m => !m.IsRead);
+
     public void Clear()
     {
         lock (_orderLock)

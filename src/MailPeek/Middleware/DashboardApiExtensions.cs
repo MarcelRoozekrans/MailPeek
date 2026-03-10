@@ -32,8 +32,7 @@ public static class DashboardApiExtensions
             var tag = context.Request.Query["tag"].FirstOrDefault();
 
             var result = store.GetPage(page, size, search, tag);
-            var allMessages = store.GetAll();
-            var unreadCount = allMessages.Count(m => !m.IsRead);
+            var unreadCount = store.GetUnreadCount();
             return Results.Json(new
             {
                 items = result.Items.Select(m => m.ToSummary()),

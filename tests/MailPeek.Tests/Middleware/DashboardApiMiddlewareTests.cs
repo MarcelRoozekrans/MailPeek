@@ -195,6 +195,13 @@ public class DashboardApiMiddlewareTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task GetLinks_ReturnsNotFoundForMissing()
+    {
+        var response = await _client!.GetAsync($"/mailpeek/api/messages/{Guid.NewGuid()}/links");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task GetLinks_Returns200WhenComplete()
     {
         var msg = new StoredMessage

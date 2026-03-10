@@ -11,6 +11,7 @@ public interface IMessageStore
     bool MarkAsRead(Guid id);
     bool SetTags(Guid id, IList<string> tags);
     void Clear();
+    int GetUnreadCount();
     PagedResult<StoredMessage> GetPage(int pageNumber, int pageSize, string? searchTerm = null, string? tag = null);
 #pragma warning disable MA0046
     event Action<StoredMessage>? OnMessageReceived;

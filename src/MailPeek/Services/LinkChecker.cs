@@ -2,13 +2,15 @@ using System.Text.RegularExpressions;
 using MailPeek.Hubs;
 using MailPeek.Models;
 using MailPeek.Storage;
+using Microsoft.Extensions.Logging;
 
 namespace MailPeek.Services;
 
 public partial class LinkChecker(
     IMessageStore store,
     IHttpClientFactory httpClientFactory,
-    MailPeekHubNotifier hubNotifier)
+    MailPeekHubNotifier hubNotifier,
+    ILogger<LinkChecker> logger)
 {
     private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(5);
 
@@ -51,9 +53,10 @@ public partial class LinkChecker(
                 result.Status = LinkStatus.Timeout;
             }
 #pragma warning disable CA1031
-            catch
+            catch (Exception ex)
 #pragma warning restore CA1031
             {
+                logger.LogWarning(ex, "Link check failed for URL {Url}", url);
                 result.Status = LinkStatus.Error;
             }
             results.Add(result);
