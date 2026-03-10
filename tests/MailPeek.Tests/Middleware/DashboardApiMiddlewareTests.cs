@@ -115,6 +115,29 @@ public class DashboardApiMiddlewareTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task MarkAsRead_ReturnsOk()
+    {
+        var msg = new StoredMessage
+        {
+            From = "test@test.com",
+            To = ["r@test.com"],
+            Subject = "Test"
+        };
+        _store.Add(msg);
+
+        var response = await _client!.PutAsync($"/mailpeek/api/messages/{msg.Id}/read", null);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.True(_store.GetById(msg.Id)!.IsRead);
+    }
+
+    [Fact]
+    public async Task MarkAsRead_ReturnsNotFoundForMissing()
+    {
+        var response = await _client!.PutAsync($"/mailpeek/api/messages/{Guid.NewGuid()}/read", null);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task DeleteAllMessages_ClearsStore()
     {
         _store.Add(new StoredMessage { From = "a@t.com", To = ["b@t.com"], Subject = "1" });

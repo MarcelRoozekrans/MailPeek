@@ -36,6 +36,21 @@ public class StoredMessageTests
     }
 
     [Fact]
+    public void IsRead_DefaultsFalse()
+    {
+        var msg = new StoredMessage();
+        Assert.False(msg.IsRead);
+    }
+
+    [Fact]
+    public void ToSummary_IncludesIsRead()
+    {
+        var msg = new StoredMessage { IsRead = true };
+        var summary = msg.ToSummary();
+        Assert.True(summary.IsRead);
+    }
+
+    [Fact]
     public void ToSummary_MapsCorrectly()
     {
         var msg = new StoredMessage

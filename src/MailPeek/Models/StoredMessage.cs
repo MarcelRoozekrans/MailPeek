@@ -16,6 +16,7 @@ public class StoredMessage
     public byte[]? RawMessage { get; set; }
     public bool ParseError { get; set; }
     public string? ParseErrorMessage { get; set; }
+    public bool IsRead { get; set; }
 
     public bool HasAttachments => Attachments.Count > 0;
 
@@ -26,6 +27,7 @@ public class StoredMessage
         To = To,
         Subject = Subject,
         HasAttachments = HasAttachments,
-        ReceivedAt = ReceivedAt
+        ReceivedAt = ReceivedAt,
+        IsRead = IsRead
     };
 }

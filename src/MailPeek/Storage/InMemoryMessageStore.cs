@@ -61,6 +61,14 @@ public class InMemoryMessageStore(int maxMessages = 1000) : IMessageStore
         return true;
     }
 
+    public bool MarkAsRead(Guid id)
+    {
+        if (!_messages.TryGetValue(id, out var message))
+            return false;
+        message.IsRead = true;
+        return true;
+    }
+
     public void Clear()
     {
         lock (_orderLock)

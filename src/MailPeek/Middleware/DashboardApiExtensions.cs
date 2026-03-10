@@ -90,6 +90,11 @@ public static class DashboardApiExtensions
             return Results.Ok();
         });
 
+        endpoints.MapPut($"{api}/messages/{{id:guid}}/read", (Guid id, IMessageStore store) =>
+        {
+            return store.MarkAsRead(id) ? Results.Ok() : Results.NotFound();
+        });
+
         return endpoints;
     }
 }

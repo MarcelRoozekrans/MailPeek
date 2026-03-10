@@ -8,6 +8,7 @@ public interface IMessageStore
     IReadOnlyList<StoredMessage> GetAll();
     StoredMessage? GetById(Guid id);
     bool Delete(Guid id);
+    bool MarkAsRead(Guid id);
     void Clear();
     PagedResult<StoredMessage> GetPage(int pageNumber, int pageSize, string? searchTerm = null);
 #pragma warning disable MA0046

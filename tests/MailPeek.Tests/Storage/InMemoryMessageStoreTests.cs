@@ -118,6 +118,22 @@ public class InMemoryMessageStoreTests
         Assert.Equal(10, page.TotalCount);
     }
 
+    [Fact]
+    public void MarkAsRead_SetsIsReadTrue()
+    {
+        var msg = CreateMessage("test@example.com", "Hello");
+        _store.Add(msg);
+        var result = _store.MarkAsRead(msg.Id);
+        Assert.True(result);
+        Assert.True(_store.GetById(msg.Id)!.IsRead);
+    }
+
+    [Fact]
+    public void MarkAsRead_ReturnsFalseForMissing()
+    {
+        Assert.False(_store.MarkAsRead(Guid.NewGuid()));
+    }
+
     private static StoredMessage CreateMessage(string from, string subject) => new()
     {
         From = from,
