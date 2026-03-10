@@ -43,7 +43,9 @@ jobs:
         run: dotnet test --no-build -c Release --verbosity normal
 
       - name: Pack
-        run: dotnet pack src/MailPeek/MailPeek.csproj --no-build -c Release -p:PackageVersion=${{ steps.gitversion.outputs.version }} -o ./artifacts
+        run: |
+          dotnet pack src/MailPeek/MailPeek.csproj --no-build -c Release -p:PackageVersion=${{ steps.gitversion.outputs.version }} -o ./artifacts
+          dotnet pack src/MailPeek.Hosting.Aspire/MailPeek.Hosting.Aspire.csproj --no-build -c Release -p:PackageVersion=${{ steps.gitversion.outputs.version }} -o ./artifacts
 
       - name: Push to NuGet (pre-release)
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'

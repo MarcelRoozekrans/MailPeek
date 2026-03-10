@@ -126,6 +126,41 @@ Assert.Equal("user@example.com", messages[0].To.First());
 Assert.Equal("Welcome!", messages[0].Subject);
 ```
 
+## Aspire Integration
+
+MailPeek integrates with [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/) for service discovery.
+
+### AppHost
+
+Install the hosting package in your AppHost project:
+
+```bash
+dotnet add package MailPeek.Hosting.Aspire
+```
+
+```csharp
+var mailpeek = builder.AddMailPeek("mailpeek", smtpPort: 2525);
+
+builder.AddProject<Projects.WebApp>("webapp")
+    .WithReference(mailpeek);
+```
+
+### Consuming Service
+
+In the web project that hosts the MailPeek dashboard:
+
+```csharp
+builder.Services.AddMailPeek("mailpeek"); // reads SMTP config from Aspire
+app.UseMailPeek();
+```
+
+Other services can read the SMTP connection string directly:
+
+```csharp
+var smtp = builder.Configuration.GetConnectionString("mailpeek");
+// -> "smtp://localhost:2525"
+```
+
 ## Dashboard Pages
 
 | Page | Description |
