@@ -36,6 +36,36 @@ public class StoredMessageTests
     }
 
     [Fact]
+    public void IsRead_DefaultsFalse()
+    {
+        var msg = new StoredMessage();
+        Assert.False(msg.IsRead);
+    }
+
+    [Fact]
+    public void ToSummary_IncludesIsRead()
+    {
+        var msg = new StoredMessage { IsRead = true };
+        var summary = msg.ToSummary();
+        Assert.True(summary.IsRead);
+    }
+
+    [Fact]
+    public void Tags_DefaultsEmpty()
+    {
+        var msg = new StoredMessage();
+        Assert.Empty(msg.Tags);
+    }
+
+    [Fact]
+    public void ToSummary_IncludesTags()
+    {
+        var msg = new StoredMessage { Tags = ["welcome", "signup"] };
+        var summary = msg.ToSummary();
+        Assert.Equal(["welcome", "signup"], summary.Tags);
+    }
+
+    [Fact]
     public void ToSummary_MapsCorrectly()
     {
         var msg = new StoredMessage

@@ -23,4 +23,7 @@ public class MailPeekHubNotifier(
 
     public Task NotifyMessagesCleared() =>
         hubContext.Clients.All.SendAsync("MessagesCleared");
+
+    public Task NotifyLinkCheckComplete(Guid id) =>
+        hubContext.Clients.All.SendAsync("LinkCheckComplete", id);
 }

@@ -43,6 +43,7 @@
                 <button class="tab" data-tab="text">Text</button>
                 <button class="tab" data-tab="headers">Headers</button>
                 <button class="tab" data-tab="attachments">Attachments</button>
+                <button class="tab" data-tab="links">Links</button>
             </div>
             <div id="tabContent">
                 <div id="tab-html" class="tab-panel active">
@@ -51,6 +52,13 @@
                 <div id="tab-text" class="tab-panel"><pre id="textPreview"></pre></div>
                 <div id="tab-headers" class="tab-panel"><table id="headersTable"></table></div>
                 <div id="tab-attachments" class="tab-panel"><ul id="attachmentsList"></ul></div>
+                <div id="tab-links" class="tab-panel">
+                    <div id="linksStatus" class="hidden">Checking links...</div>
+                    <table id="linksTable" class="hidden">
+                        <thead><tr><th>URL</th><th>Status</th></tr></thead>
+                        <tbody id="linksBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>

@@ -8,4 +8,6 @@ public class MessageSummary
     public required string Subject { get; set; }
     public required bool HasAttachments { get; set; }
     public required DateTimeOffset ReceivedAt { get; set; }
+    public required bool IsRead { get; set; }
+    public required IReadOnlyList<string> Tags { get; set; }
 }

@@ -235,6 +235,22 @@ main {
     width: 40px;
 }
 
+/* ── Unread Indicator ────────────────────────────────────── */
+#messageTable tbody tr.unread td {
+    font-weight: 600;
+}
+
+#messageTable tbody tr.unread td:first-child::after {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
 /* ── Pagination ───────────────────────────────────────── */
 #pagination {
     display: flex;
@@ -450,6 +466,36 @@ main {
     color: var(--text-muted);
     font-size: 0.8rem;
 }
+
+/* ── Tag Pills ───────────────────────────────────────────── */
+.tag-pill {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-left: 6px;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: opacity 0.15s;
+}
+
+.tag-pill:hover {
+    opacity: 0.8;
+}
+
+/* ── Link Status ─────────────────────────────────────────── */
+#linksTable { width: 100%; border-collapse: collapse; }
+#linksTable th, #linksTable td { padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 0.85rem; text-align: left; }
+#linksTable a { color: var(--primary); text-decoration: none; word-break: break-all; }
+#linksTable a:hover { text-decoration: underline; }
+.link-status { font-weight: 600; }
+.link-status-ok { color: #22c55e; }
+.link-status-broken { color: var(--danger); }
+.link-status-timeout { color: #f59e0b; }
+.link-status-error { color: var(--danger); }
+#linksStatus { padding: 16px; color: var(--text-muted); font-style: italic; }
 
 /* ── Responsive ───────────────────────────────────────── */
 @media (max-width: 768px) {

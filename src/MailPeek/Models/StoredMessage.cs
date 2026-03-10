@@ -16,6 +16,12 @@ public class StoredMessage
     public byte[]? RawMessage { get; set; }
     public bool ParseError { get; set; }
     public string? ParseErrorMessage { get; set; }
+    public bool IsRead { get; set; }
+#pragma warning disable MA0016
+    public List<string> Tags { get; set; } = [];
+    public List<LinkCheckResult>? LinkCheckResults { get; set; }
+#pragma warning restore MA0016
+    public bool LinkCheckComplete { get; set; }
 
     public bool HasAttachments => Attachments.Count > 0;
 
@@ -26,6 +32,8 @@ public class StoredMessage
         To = To,
         Subject = Subject,
         HasAttachments = HasAttachments,
-        ReceivedAt = ReceivedAt
+        ReceivedAt = ReceivedAt,
+        IsRead = IsRead,
+        Tags = Tags
     };
 }

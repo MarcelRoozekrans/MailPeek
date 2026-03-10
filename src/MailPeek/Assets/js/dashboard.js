@@ -4,12 +4,17 @@ const Dashboard = (() => {
     const pageSize = 25;
     let connection = null;
     let searchTimeout = null;
+    let currentTag = null;
 
     function init(prefix) {
         pathPrefix = prefix.replace(/\/+$/, '');
         setupSignalR();
         setupEventListeners();
         loadMessages();
+
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
     }
 
     // ── SignalR ──────────────────────────────────────────
@@ -24,8 +29,19 @@ const Dashboard = (() => {
             .withAutomaticReconnect()
             .build();
 
-        connection.on('NewMessage', function () {
+        connection.on('NewMessage', function (summary) {
             loadMessages();
+            if ('Notification' in window && Notification.permission === 'granted') {
+                var n = new Notification(summary.subject || '(no subject)', {
+                    body: 'From: ' + (summary.from || 'unknown'),
+                    tag: summary.id
+                });
+                n.onclick = function () {
+                    window.focus();
+                    showMessage(summary.id);
+                    n.close();
+                };
+            }
         });
 
         connection.on('MessageDeleted', function () {
@@ -73,11 +89,11 @@ const Dashboard = (() => {
     async function loadMessages() {
         var search = document.getElementById('search').value;
         try {
-            var response = await fetch(
-                pathPrefix + '/api/messages?page=' + currentPage +
-                '&size=' + pageSize +
-                '&search=' + encodeURIComponent(search)
-            );
+            var url = pathPrefix + '/api/messages?page=' + currentPage + '&size=' + pageSize + '&search=' + encodeURIComponent(search);
+            if (currentTag) {
+                url += '&tag=' + encodeURIComponent(currentTag);
+            }
+            var response = await fetch(url);
             if (!response.ok) throw new Error('Failed to load messages');
             var data = await response.json();
             renderInbox(data);
@@ -96,8 +112,11 @@ const Dashboard = (() => {
 
         // Update message count badge
         var badge = document.getElementById('messageCount');
+        var unreadCount = data.unreadCount || 0;
         if (totalCount > 0) {
-            badge.textContent = totalCount + (totalCount === 1 ? ' message' : ' messages');
+            badge.textContent = unreadCount > 0
+                ? unreadCount + ' / ' + totalCount
+                : totalCount + (totalCount === 1 ? ' message' : ' messages');
             badge.classList.add('visible');
         } else {
             badge.classList.remove('visible');
@@ -117,6 +136,9 @@ const Dashboard = (() => {
 
         items.forEach(function (msg) {
             var tr = document.createElement('tr');
+            if (!msg.isRead) {
+                tr.classList.add('unread');
+            }
             tr.addEventListener('click', function () {
                 showMessage(msg.id);
             });
@@ -132,6 +154,20 @@ const Dashboard = (() => {
             var tdSubject = document.createElement('td');
             tdSubject.setAttribute('data-label', 'Subject');
             tdSubject.textContent = msg.subject || '(no subject)';
+            if (msg.tags && msg.tags.length > 0) {
+                msg.tags.forEach(function (tag) {
+                    var pill = document.createElement('span');
+                    pill.className = 'tag-pill';
+                    pill.textContent = tag;
+                    pill.style.backgroundColor = tagColor(tag);
+                    pill.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        document.getElementById('search').value = '';
+                        filterByTag(tag);
+                    });
+                    tdSubject.appendChild(pill);
+                });
+            }
 
             var tdDate = document.createElement('td');
             tdDate.setAttribute('data-label', 'Date');
@@ -211,6 +247,11 @@ const Dashboard = (() => {
             if (!response.ok) throw new Error('Failed to load message');
             var msg = await response.json();
 
+            if (!msg.isRead) {
+                fetch(pathPrefix + '/api/messages/' + id + '/read', { method: 'PUT' })
+                    .catch(function(err) { console.error('Failed to mark as read:', err); });
+            }
+
             document.getElementById('inbox').classList.add('hidden');
             document.getElementById('messageDetail').classList.remove('hidden');
 
@@ -224,6 +265,12 @@ const Dashboard = (() => {
                 metaParts.push('<span><strong>Cc:</strong> ' + escapeHtml(msg.cc.join(', ')) + '</span>');
             }
             metaParts.push('<span><strong>Date:</strong> ' + formatDate(msg.receivedAt) + '</span>');
+            if (msg.tags && msg.tags.length > 0) {
+                var tagHtml = msg.tags.map(function(t) {
+                    return '<span class="tag-pill" style="background-color:' + tagColor(t) + '">' + escapeHtml(t) + '</span>';
+                }).join(' ');
+                metaParts.push('<span>' + tagHtml + '</span>');
+            }
             header.innerHTML = subjectHtml + '<div class="detail-meta">' + metaParts.join('') + '</div>';
 
             // HTML preview via iframe
@@ -279,6 +326,15 @@ const Dashboard = (() => {
                 });
             }
 
+            // Links
+            loadLinks(id);
+            if (connection) {
+                connection.off('LinkCheckComplete');
+                connection.on('LinkCheckComplete', function (completedId) {
+                    if (completedId === id) loadLinks(id);
+                });
+            }
+
             // Default to HTML tab
             switchTab('html');
         } catch (err) {
@@ -290,6 +346,7 @@ const Dashboard = (() => {
     function showInbox() {
         document.getElementById('inbox').classList.remove('hidden');
         document.getElementById('messageDetail').classList.add('hidden');
+        loadMessages();
     }
 
     // ── Tab Switching ───────────────────────────────────
@@ -325,6 +382,21 @@ const Dashboard = (() => {
     }
 
     // ── Helpers ─────────────────────────────────────────
+    function tagColor(tag) {
+        var hash = 0;
+        for (var i = 0; i < tag.length; i++) {
+            hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        var hue = Math.abs(hash) % 360;
+        return 'hsl(' + hue + ', 60%, 45%)';
+    }
+
+    function filterByTag(tag) {
+        currentTag = tag === currentTag ? null : tag;
+        currentPage = 0;
+        loadMessages();
+    }
+
     function formatDate(dateStr) {
         if (!dateStr) return '';
         try {
@@ -338,6 +410,54 @@ const Dashboard = (() => {
         var div = document.createElement('div');
         div.appendChild(document.createTextNode(str));
         return div.innerHTML;
+    }
+
+    // ── Load Links ───────────────────────────────────────
+    async function loadLinks(id) {
+        var statusEl = document.getElementById('linksStatus');
+        var tableEl = document.getElementById('linksTable');
+        var tbody = document.getElementById('linksBody');
+        try {
+            var response = await fetch(pathPrefix + '/api/messages/' + id + '/links');
+            if (response.status === 202) {
+                statusEl.textContent = 'Checking links...';
+                statusEl.classList.remove('hidden');
+                tableEl.classList.add('hidden');
+                return;
+            }
+            var links = await response.json();
+            statusEl.classList.add('hidden');
+            tbody.innerHTML = '';
+            if (!links || links.length === 0) {
+                statusEl.textContent = 'No links found.';
+                statusEl.classList.remove('hidden');
+                tableEl.classList.add('hidden');
+                return;
+            }
+            tableEl.classList.remove('hidden');
+            links.forEach(function (link) {
+                var tr = document.createElement('tr');
+                var tdUrl = document.createElement('td');
+                var a = document.createElement('a');
+                a.href = link.url;
+                a.textContent = link.url;
+                a.target = '_blank';
+                a.rel = 'noopener';
+                tdUrl.appendChild(a);
+                var tdStatus = document.createElement('td');
+                var statusText = link.statusCode ? link.status + ' (' + link.statusCode + ')' : link.status;
+                var statusSpan = document.createElement('span');
+                var statusClass = String(link.status).toLowerCase();
+                statusSpan.className = 'link-status link-status-' + statusClass;
+                statusSpan.textContent = statusText;
+                tdStatus.appendChild(statusSpan);
+                tr.appendChild(tdUrl);
+                tr.appendChild(tdStatus);
+                tbody.appendChild(tr);
+            });
+        } catch (err) {
+            console.error('Error loading links:', err);
+        }
     }
 
     return { init: init };

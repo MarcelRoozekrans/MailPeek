@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>MailPeek</RootNamespace>
+    <NoWarn>$(NoWarn);EPS06</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -29,12 +29,15 @@ public static class DashboardApiExtensions
             var page = int.TryParse(context.Request.Query["page"], CultureInfo.InvariantCulture, out var p) ? p : 0;
             var size = int.TryParse(context.Request.Query["size"], CultureInfo.InvariantCulture, out var s) ? s : 50;
             var search = context.Request.Query["search"].FirstOrDefault();
+            var tag = context.Request.Query["tag"].FirstOrDefault();
 
-            var result = store.GetPage(page, size, search);
+            var result = store.GetPage(page, size, search, tag);
+            var unreadCount = store.GetUnreadCount();
             return Results.Json(new
             {
                 items = result.Items.Select(m => m.ToSummary()),
-                result.TotalCount
+                result.TotalCount,
+                unreadCount
             }, JsonOptions);
         });
 
@@ -88,6 +91,27 @@ public static class DashboardApiExtensions
                 await notifier.NotifyMessagesCleared().ConfigureAwait(false);
 
             return Results.Ok();
+        });
+
+        endpoints.MapPut($"{api}/messages/{{id:guid}}/read", (Guid id, IMessageStore store) =>
+        {
+            return store.MarkAsRead(id) ? Results.Ok() : Results.NotFound();
+        });
+
+        endpoints.MapGet($"{api}/messages/{{id:guid}}/links", (Guid id, IMessageStore store) =>
+        {
+            var msg = store.GetById(id);
+            if (msg is null) return Results.NotFound();
+            if (!msg.LinkCheckComplete)
+                return Results.Json(new { status = "checking" }, JsonOptions, statusCode: 202);
+            return Results.Json(msg.LinkCheckResults, JsonOptions);
+        });
+
+        endpoints.MapPut($"{api}/messages/{{id:guid}}/tags", async (Guid id, HttpContext context, IMessageStore store) =>
+        {
+            var tags = await context.Request.ReadFromJsonAsync<List<string>>().ConfigureAwait(false);
+            if (tags is null) return Results.BadRequest();
+            return store.SetTags(id, tags) ? Results.Ok() : Results.NotFound();
         });
 
         return endpoints;
