@@ -467,6 +467,24 @@ main {
     font-size: 0.8rem;
 }
 
+/* ── Tag Pills ───────────────────────────────────────────── */
+.tag-pill {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-left: 6px;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: opacity 0.15s;
+}
+
+.tag-pill:hover {
+    opacity: 0.8;
+}
+
 /* ── Responsive ───────────────────────────────────────── */
 @media (max-width: 768px) {
     header {

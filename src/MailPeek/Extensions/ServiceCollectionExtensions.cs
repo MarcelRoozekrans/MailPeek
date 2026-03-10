@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using MailPeek.Configuration;
 using MailPeek.Hubs;
+using MailPeek.Services;
 using MailPeek.Smtp;
 using MailPeek.Storage;
 
@@ -23,10 +24,12 @@ public static class ServiceCollectionExtensions
             opts.Hostname = options.Hostname;
             opts.MaxMessages = options.MaxMessages;
             opts.MaxMessageSize = options.MaxMessageSize;
+            opts.AutoTagPlusAddressing = options.AutoTagPlusAddressing;
         });
 
         services.AddSingleton<IMessageStore>(new InMemoryMessageStore(options.MaxMessages));
         services.AddSingleton<MailPeekHubNotifier>();
+        services.AddSingleton<AutoTagger>();
         services.AddHostedService<MailPeekSmtpHostedService>();
         services.AddSignalR();
 
@@ -66,6 +69,7 @@ public static class ServiceCollectionExtensions
             return new InMemoryMessageStore(options.MaxMessages);
         });
         services.AddSingleton<MailPeekHubNotifier>();
+        services.AddSingleton<AutoTagger>();
         services.AddHostedService<MailPeekSmtpHostedService>();
         services.AddSignalR();
 

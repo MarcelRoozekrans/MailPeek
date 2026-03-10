@@ -4,6 +4,7 @@ const Dashboard = (() => {
     const pageSize = 25;
     let connection = null;
     let searchTimeout = null;
+    let currentTag = null;
 
     function init(prefix) {
         pathPrefix = prefix.replace(/\/+$/, '');
@@ -88,11 +89,11 @@ const Dashboard = (() => {
     async function loadMessages() {
         var search = document.getElementById('search').value;
         try {
-            var response = await fetch(
-                pathPrefix + '/api/messages?page=' + currentPage +
-                '&size=' + pageSize +
-                '&search=' + encodeURIComponent(search)
-            );
+            var url = pathPrefix + '/api/messages?page=' + currentPage + '&size=' + pageSize + '&search=' + encodeURIComponent(search);
+            if (currentTag) {
+                url += '&tag=' + encodeURIComponent(currentTag);
+            }
+            var response = await fetch(url);
             if (!response.ok) throw new Error('Failed to load messages');
             var data = await response.json();
             renderInbox(data);
@@ -153,6 +154,20 @@ const Dashboard = (() => {
             var tdSubject = document.createElement('td');
             tdSubject.setAttribute('data-label', 'Subject');
             tdSubject.textContent = msg.subject || '(no subject)';
+            if (msg.tags && msg.tags.length > 0) {
+                msg.tags.forEach(function (tag) {
+                    var pill = document.createElement('span');
+                    pill.className = 'tag-pill';
+                    pill.textContent = tag;
+                    pill.style.backgroundColor = tagColor(tag);
+                    pill.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        document.getElementById('search').value = '';
+                        filterByTag(tag);
+                    });
+                    tdSubject.appendChild(pill);
+                });
+            }
 
             var tdDate = document.createElement('td');
             tdDate.setAttribute('data-label', 'Date');
@@ -250,6 +265,12 @@ const Dashboard = (() => {
                 metaParts.push('<span><strong>Cc:</strong> ' + escapeHtml(msg.cc.join(', ')) + '</span>');
             }
             metaParts.push('<span><strong>Date:</strong> ' + formatDate(msg.receivedAt) + '</span>');
+            if (msg.tags && msg.tags.length > 0) {
+                var tagHtml = msg.tags.map(function(t) {
+                    return '<span class="tag-pill" style="background-color:' + tagColor(t) + '">' + escapeHtml(t) + '</span>';
+                }).join(' ');
+                metaParts.push('<span>' + tagHtml + '</span>');
+            }
             header.innerHTML = subjectHtml + '<div class="detail-meta">' + metaParts.join('') + '</div>';
 
             // HTML preview via iframe
@@ -352,6 +373,21 @@ const Dashboard = (() => {
     }
 
     // ── Helpers ─────────────────────────────────────────
+    function tagColor(tag) {
+        var hash = 0;
+        for (var i = 0; i < tag.length; i++) {
+            hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        var hue = Math.abs(hash) % 360;
+        return 'hsl(' + hue + ', 60%, 45%)';
+    }
+
+    function filterByTag(tag) {
+        currentTag = tag === currentTag ? null : tag;
+        currentPage = 0;
+        loadMessages();
+    }
+
     function formatDate(dateStr) {
         if (!dateStr) return '';
         try {

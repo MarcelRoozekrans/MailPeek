@@ -4,6 +4,7 @@ using MailPeek.Authorization;
 using MailPeek.Configuration;
 using MailPeek.Hubs;
 using MailPeek.Middleware;
+using MailPeek.Services;
 
 namespace MailPeek.Extensions;
 
@@ -53,6 +54,9 @@ public static class ApplicationBuilderExtensions
         // Start the SignalR notifier
         var notifier = app.ApplicationServices.GetRequiredService<MailPeekHubNotifier>();
         notifier.Start();
+
+        var autoTagger = app.ApplicationServices.GetRequiredService<AutoTagger>();
+        autoTagger.Start();
 
         return app;
     }
