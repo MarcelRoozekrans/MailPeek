@@ -33,6 +33,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<AutoTagger>();
         services.AddHttpClient("LinkChecker");
         services.AddSingleton<LinkChecker>();
+        services.AddSingleton<HtmlCompatibilityChecker>();
         services.AddHttpClient("Webhook");
         services.AddSingleton<WebhookNotifier>();
         services.AddHostedService<MailPeekSmtpHostedService>();
@@ -79,6 +80,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<AutoTagger>();
         services.AddHttpClient("LinkChecker");
         services.AddSingleton<LinkChecker>();
+        services.AddSingleton<HtmlCompatibilityChecker>();
         services.AddHttpClient("Webhook");
         services.AddSingleton<WebhookNotifier>();
         services.AddHostedService<MailPeekSmtpHostedService>();

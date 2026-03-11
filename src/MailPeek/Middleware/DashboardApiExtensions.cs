@@ -137,6 +137,15 @@ public static class DashboardApiExtensions
             return Results.Json(msg.LinkCheckResults, JsonOptions);
         });
 
+        endpoints.MapGet($"{api}/messages/{{id:guid}}/compatibility", (Guid id, IMessageStore store) =>
+        {
+            var msg = store.GetById(id);
+            if (msg is null) return Results.NotFound();
+            if (!msg.HtmlCompatibilityCheckComplete)
+                return Results.Json(new { status = "checking" }, JsonOptions, statusCode: 202);
+            return Results.Json(msg.HtmlCompatibilityResult, JsonOptions);
+        });
+
         endpoints.MapPut($"{api}/messages/{{id:guid}}/tags", async (Guid id, HttpContext context, IMessageStore store) =>
         {
             var tags = await context.Request.ReadFromJsonAsync<List<string>>().ConfigureAwait(false);
