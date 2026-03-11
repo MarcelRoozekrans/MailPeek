@@ -64,6 +64,9 @@ public static class ApplicationBuilderExtensions
         var htmlCompatChecker = app.ApplicationServices.GetRequiredService<HtmlCompatibilityChecker>();
         htmlCompatChecker.Start();
 
+        var spamScorer = app.ApplicationServices.GetRequiredService<SpamScorer>();
+        spamScorer.Start();
+
         var webhookNotifier = app.ApplicationServices.GetRequiredService<WebhookNotifier>();
         webhookNotifier.Start();
 

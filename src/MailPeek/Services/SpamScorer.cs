@@ -1,14 +1,17 @@
 using System.Text.RegularExpressions;
+using MailPeek.Configuration;
 using MailPeek.Hubs;
 using MailPeek.Models;
 using MailPeek.Storage;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace MailPeek.Services;
 
 public partial class SpamScorer(
     IMessageStore store,
     MailPeekHubNotifier hubNotifier,
+    IOptions<MailPeekSmtpOptions> options,
     ILogger<SpamScorer> logger)
 {
     public void Start()
@@ -25,7 +28,17 @@ public partial class SpamScorer(
     {
         try
         {
-            message.SpamCheckResult = Analyze(message);
+            var config = options.Value;
+            SpamCheckResult? result = null;
+
+            if (config.SpamAssassin is { Enabled: true } saOptions && message.RawMessage is not null)
+            {
+                result = await SpamAssassinClient.CheckAsync(message.RawMessage, saOptions, logger).ConfigureAwait(false);
+            }
+
+            result ??= Analyze(message);
+
+            message.SpamCheckResult = result;
             message.SpamCheckComplete = true;
             await hubNotifier.NotifySpamCheckComplete(message.Id).ConfigureAwait(false);
         }

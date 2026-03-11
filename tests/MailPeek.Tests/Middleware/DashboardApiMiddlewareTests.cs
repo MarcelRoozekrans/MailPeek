@@ -291,4 +291,34 @@ public class DashboardApiMiddlewareTests : IAsyncLifetime
         var response = await _client!.GetAsync($"/mailpeek/api/messages/{Guid.NewGuid()}/compatibility");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task GetSpam_Returns202WhenChecking()
+    {
+        var msg = new StoredMessage { From = "a@b.com", To = ["c@d.com"], Subject = "Test" };
+        _store.Add(msg);
+        var response = await _client!.GetAsync($"/mailpeek/api/messages/{msg.Id}/spam");
+        Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetSpam_Returns200WhenComplete()
+    {
+        var msg = new StoredMessage
+        {
+            From = "a@b.com", To = ["c@d.com"], Subject = "Test",
+            SpamCheckComplete = true,
+            SpamCheckResult = new SpamCheckResult { Score = 2.5, Source = "builtin" }
+        };
+        _store.Add(msg);
+        var response = await _client!.GetAsync($"/mailpeek/api/messages/{msg.Id}/spam");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetSpam_ReturnsNotFoundForMissing()
+    {
+        var response = await _client!.GetAsync($"/mailpeek/api/messages/{Guid.NewGuid()}/spam");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
 }
