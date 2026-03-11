@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.3.0...v0.4.0) (2026-03-11)
+
+
+### Features
+
+* add bulk delete and sortable column headers ([d65b4a5](https://github.com/MarcelRoozekrans/MailPeek/commit/d65b4a5df8212b675f9077674167a19060bd1f09))
+* add bulk-delete API endpoint with hub notification ([777537b](https://github.com/MarcelRoozekrans/MailPeek/commit/777537b98e7a6bc1481ae4af062b8ced693eabcf))
+* add checkbox bulk delete and sortable column headers to dashboard ([a2592e2](https://github.com/MarcelRoozekrans/MailPeek/commit/a2592e22817d06a6f48fe1a1583ec8a6707ceaa8))
+* add sort query params to API and update README ([7f3a7c6](https://github.com/MarcelRoozekrans/MailPeek/commit/7f3a7c6bb3d1d446fb509304b42ea08ebd41269c))
+
 ## [0.3.0](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.2.0...v0.3.0) (2026-03-10)
 
 
