@@ -485,6 +485,17 @@ main {
     opacity: 0.8;
 }
 
+/* ── Message Snippet ────────────────────────────────────── */
+.msg-snippet {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 400px;
+    margin-top: 2px;
+}
+
 /* ── Link Status ─────────────────────────────────────────── */
 #linksTable { width: 100%; border-collapse: collapse; }
 #linksTable th, #linksTable td { padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 0.85rem; text-align: left; }
@@ -619,6 +630,8 @@ main {
         font-size: 0.78rem;
         text-transform: uppercase;
     }
+
+    #messageTable tbody td .msg-snippet { display: none; }
 
     #messageTable tbody td.col-actions {
         display: flex;

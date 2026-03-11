@@ -232,6 +232,13 @@ const Dashboard = (() => {
                 });
             }
 
+            if (msg.snippet) {
+                var snippetEl = document.createElement('div');
+                snippetEl.className = 'msg-snippet';
+                snippetEl.textContent = msg.snippet;
+                tdSubject.appendChild(snippetEl);
+            }
+
             var tdDate = document.createElement('td');
             tdDate.setAttribute('data-label', 'Date');
             tdDate.textContent = formatDate(msg.receivedAt);
