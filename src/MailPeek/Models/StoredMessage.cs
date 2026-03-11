@@ -9,6 +9,7 @@ public class StoredMessage
     public IReadOnlyList<string> Cc { get; set; } = [];
     public IReadOnlyList<string> Bcc { get; set; } = [];
     public string Subject { get; set; } = string.Empty;
+    public string Snippet { get; set; } = string.Empty;
     public string? TextBody { get; set; }
     public string? HtmlBody { get; set; }
     public IList<StoredAttachment> Attachments { get; set; } = [];
@@ -31,6 +32,7 @@ public class StoredMessage
         From = From,
         To = To,
         Subject = Subject,
+        Snippet = Snippet,
         HasAttachments = HasAttachments,
         ReceivedAt = ReceivedAt,
         IsRead = IsRead,

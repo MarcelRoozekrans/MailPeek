@@ -6,6 +6,7 @@ public class MessageSummary
     public required string From { get; set; }
     public required IReadOnlyList<string> To { get; set; }
     public required string Subject { get; set; }
+    public required string Snippet { get; set; }
     public required bool HasAttachments { get; set; }
     public required DateTimeOffset ReceivedAt { get; set; }
     public required bool IsRead { get; set; }
