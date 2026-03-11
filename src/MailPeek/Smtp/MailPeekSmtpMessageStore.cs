@@ -36,6 +36,7 @@ public class MailPeekSmtpMessageStore(MailPeek.Storage.IMessageStore messageStor
             storedMessage.Subject = mime.Subject ?? string.Empty;
             storedMessage.TextBody = mime.TextBody;
             storedMessage.HtmlBody = mime.HtmlBody;
+            storedMessage.Snippet = Services.SnippetExtractor.Extract(storedMessage);
 
             foreach (var header in mime.Headers)
             {

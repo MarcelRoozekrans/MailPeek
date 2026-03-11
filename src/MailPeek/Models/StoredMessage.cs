@@ -9,6 +9,7 @@ public class StoredMessage
     public IReadOnlyList<string> Cc { get; set; } = [];
     public IReadOnlyList<string> Bcc { get; set; } = [];
     public string Subject { get; set; } = string.Empty;
+    public string Snippet { get; set; } = string.Empty;
     public string? TextBody { get; set; }
     public string? HtmlBody { get; set; }
     public IList<StoredAttachment> Attachments { get; set; } = [];
@@ -22,6 +23,10 @@ public class StoredMessage
     public List<LinkCheckResult>? LinkCheckResults { get; set; }
 #pragma warning restore MA0016
     public bool LinkCheckComplete { get; set; }
+    public HtmlCompatibilityResult? HtmlCompatibilityResult { get; set; }
+    public bool HtmlCompatibilityCheckComplete { get; set; }
+    public SpamCheckResult? SpamCheckResult { get; set; }
+    public bool SpamCheckComplete { get; set; }
 
     public bool HasAttachments => Attachments.Count > 0;
 
@@ -31,6 +36,7 @@ public class StoredMessage
         From = From,
         To = To,
         Subject = Subject,
+        Snippet = Snippet,
         HasAttachments = HasAttachments,
         ReceivedAt = ReceivedAt,
         IsRead = IsRead,

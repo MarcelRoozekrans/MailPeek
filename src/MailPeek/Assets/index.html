@@ -45,6 +45,8 @@
                 <button class="tab" data-tab="headers">Headers</button>
                 <button class="tab" data-tab="attachments">Attachments</button>
                 <button class="tab" data-tab="links">Links</button>
+                <button class="tab" data-tab="compatibility">Compatibility</button>
+                <button class="tab" data-tab="spam">Spam</button>
             </div>
             <div id="tabContent">
                 <div id="tab-html" class="tab-panel active">
@@ -60,12 +62,31 @@
                         <tbody id="linksBody"></tbody>
                     </table>
                 </div>
+                <div id="tab-compatibility" class="tab-panel">
+                    <div id="compatibilityContent"></div>
+                </div>
+                <div id="tab-spam" class="tab-panel">
+                    <div id="spamContent"></div>
+                </div>
             </div>
         </div>
         <div id="bulkBar" class="bulk-bar hidden">
             <span id="bulkCount">0 selected</span>
             <button id="bulkDelete" class="btn btn-danger btn-sm">Delete</button>
             <button id="bulkClear" class="btn btn-sm">Clear selection</button>
+        </div>
+        <div id="keyboardHelp" class="keyboard-help-overlay">
+            <div class="keyboard-help">
+                <h3>Keyboard Shortcuts</h3>
+                <table>
+                    <tr><td><kbd>j</kbd></td><td>Next message</td></tr>
+                    <tr><td><kbd>k</kbd></td><td>Previous message</td></tr>
+                    <tr><td><kbd>Enter</kbd></td><td>Open message</td></tr>
+                    <tr><td><kbd>Delete</kbd></td><td>Delete message</td></tr>
+                    <tr><td><kbd>Esc</kbd></td><td>Back to inbox / Close</td></tr>
+                    <tr><td><kbd>?</kbd></td><td>Show this help</td></tr>
+                </table>
+            </div>
         </div>
     </main>
     <script src="{{PATH_PREFIX}}/assets/js/signalr.min.js"></script>

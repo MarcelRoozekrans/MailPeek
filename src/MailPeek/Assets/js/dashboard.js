@@ -8,6 +8,7 @@ const Dashboard = (() => {
     let selectedIds = new Set();
     let currentSort = 'date';
     let sortDescending = true;
+    let focusedIndex = -1;
 
     function init(prefix) {
         pathPrefix = prefix.replace(/\/+$/, '');
@@ -113,6 +114,11 @@ const Dashboard = (() => {
         document.getElementById('bulkDelete').addEventListener('click', bulkDelete);
         document.getElementById('bulkClear').addEventListener('click', clearSelection);
 
+        document.addEventListener('keydown', handleKeyDown);
+        document.getElementById('keyboardHelp').addEventListener('click', function (e) {
+            if (e.target.id === 'keyboardHelp') hideKeyboardHelp();
+        });
+
         // Sortable column headers
         document.querySelectorAll('#messageTable thead th.sortable').forEach(function (th) {
             th.addEventListener('click', function () {
@@ -163,6 +169,7 @@ const Dashboard = (() => {
         }
 
         tbody.innerHTML = '';
+        focusedIndex = -1;
 
         if (items.length === 0) {
             table.classList.add('hidden');
@@ -230,6 +237,13 @@ const Dashboard = (() => {
                     });
                     tdSubject.appendChild(pill);
                 });
+            }
+
+            if (msg.snippet) {
+                var snippetEl = document.createElement('div');
+                snippetEl.className = 'msg-snippet';
+                snippetEl.textContent = msg.snippet;
+                tdSubject.appendChild(snippetEl);
             }
 
             var tdDate = document.createElement('td');
@@ -401,6 +415,24 @@ const Dashboard = (() => {
                 });
             }
 
+            // Compatibility
+            loadCompatibility(id);
+            if (connection) {
+                connection.off('HtmlCompatibilityCheckComplete');
+                connection.on('HtmlCompatibilityCheckComplete', function (completedId) {
+                    if (completedId === id) loadCompatibility(id);
+                });
+            }
+
+            // Spam
+            loadSpam(id);
+            if (connection) {
+                connection.off('SpamCheckComplete');
+                connection.on('SpamCheckComplete', function (completedId) {
+                    if (completedId === id) loadSpam(id);
+                });
+            }
+
             // Default to HTML tab
             switchTab('html');
         } catch (err) {
@@ -526,6 +558,77 @@ const Dashboard = (() => {
         }
     }
 
+    // ── Load Compatibility ────────────────────────────────
+    async function loadCompatibility(id) {
+        var container = document.getElementById('compatibilityContent');
+        container.innerHTML = '<p class="text-muted">Checking compatibility...</p>';
+
+        try {
+            var resp = await fetch(pathPrefix + '/api/messages/' + id + '/compatibility');
+            if (resp.status === 202) {
+                container.innerHTML = '<p class="text-muted">Compatibility check in progress...</p>';
+                return;
+            }
+            var data = await resp.json();
+
+            var scoreClass = data.score >= 80 ? 'score-good' : data.score >= 50 ? 'score-warn' : 'score-bad';
+            var html = '<div class="compat-score ' + scoreClass + '">' + data.score + '/100</div>';
+
+            if (data.issues && data.issues.length > 0) {
+                html += '<div class="compat-issues">';
+                data.issues.forEach(function (issue) {
+                    html += '<div class="compat-issue severity-' + issue.severity.toLowerCase() + '">'
+                        + '<div class="compat-issue-title">' + escapeHtml(issue.description) + '</div>'
+                        + '<div class="compat-issue-clients">Affected: ' + escapeHtml(issue.affectedClients.join(', ')) + '</div>'
+                        + '</div>';
+                });
+                html += '</div>';
+            } else {
+                html += '<p class="text-muted">No compatibility issues found.</p>';
+            }
+
+            container.innerHTML = html;
+        } catch (err) {
+            console.error('Error loading compatibility:', err);
+        }
+    }
+
+    // ── Load Spam ─────────────────────────────────────────
+    async function loadSpam(id) {
+        var container = document.getElementById('spamContent');
+        container.innerHTML = '<p class="text-muted">Checking spam score...</p>';
+
+        try {
+            var resp = await fetch(pathPrefix + '/api/messages/' + id + '/spam');
+            if (resp.status === 202) {
+                container.innerHTML = '<p class="text-muted">Spam analysis in progress...</p>';
+                return;
+            }
+            var data = await resp.json();
+
+            var riskClass = data.score <= 5 ? 'risk-low' : data.score <= 12 ? 'risk-medium' : 'risk-high';
+            var riskLabel = data.score <= 5 ? 'Low Risk' : data.score <= 12 ? 'Medium Risk' : 'High Risk';
+            var html = '<div class="spam-score ' + riskClass + '">' + data.score.toFixed(1) + ' \u2014 ' + riskLabel + '</div>';
+            html += '<div class="spam-source">Source: ' + escapeHtml(data.source) + '</div>';
+
+            if (data.rules && data.rules.length > 0) {
+                data.rules.forEach(function (rule) {
+                    html += '<div class="spam-rule">'
+                        + '<div><span class="spam-rule-name">' + escapeHtml(rule.name) + '</span><br>'
+                        + '<span class="spam-rule-desc">' + escapeHtml(rule.description) + '</span></div>'
+                        + '<div class="spam-rule-score">+' + rule.score.toFixed(1) + '</div>'
+                        + '</div>';
+                });
+            } else {
+                html += '<p class="text-muted">No spam indicators found.</p>';
+            }
+
+            container.innerHTML = html;
+        } catch (err) {
+            console.error('Error loading spam:', err);
+        }
+    }
+
     // ── Bulk Operations ──────────────────────────────────
     function updateBulkBar() {
         var bar = document.getElementById('bulkBar');
@@ -608,6 +711,76 @@ const Dashboard = (() => {
                 if (arrow) arrow.remove();
             }
         });
+    }
+
+    // ── Keyboard Navigation ──────────────────────────────
+    function handleKeyDown(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        var rows = document.querySelectorAll('#messageTable tbody tr');
+        var detailVisible = document.getElementById('messageDetail').style.display !== 'none';
+
+        switch (e.key) {
+            case 'j':
+                e.preventDefault();
+                if (!detailVisible && rows.length > 0) {
+                    focusedIndex = Math.min(focusedIndex + 1, rows.length - 1);
+                    updateFocusedRow(rows);
+                }
+                break;
+            case 'k':
+                e.preventDefault();
+                if (!detailVisible && rows.length > 0) {
+                    focusedIndex = Math.max(focusedIndex - 1, 0);
+                    updateFocusedRow(rows);
+                }
+                break;
+            case 'Enter':
+                if (!detailVisible && focusedIndex >= 0 && focusedIndex < rows.length) {
+                    e.preventDefault();
+                    rows[focusedIndex].click();
+                }
+                break;
+            case 'Delete':
+            case 'Backspace':
+                if (!detailVisible && focusedIndex >= 0 && focusedIndex < rows.length) {
+                    e.preventDefault();
+                    var deleteBtn = rows[focusedIndex].querySelector('.btn-delete-row');
+                    if (deleteBtn) deleteBtn.click();
+                    if (focusedIndex >= rows.length - 1) focusedIndex = rows.length - 2;
+                }
+                break;
+            case 'Escape':
+                if (document.getElementById('keyboardHelp').classList.contains('visible')) {
+                    hideKeyboardHelp();
+                } else if (detailVisible) {
+                    e.preventDefault();
+                    document.getElementById('backToInbox').click();
+                }
+                break;
+            case '?':
+                if (!detailVisible) {
+                    e.preventDefault();
+                    showKeyboardHelp();
+                }
+                break;
+        }
+    }
+
+    function updateFocusedRow(rows) {
+        rows.forEach(function (r) { r.classList.remove('focused'); });
+        if (focusedIndex >= 0 && focusedIndex < rows.length) {
+            rows[focusedIndex].classList.add('focused');
+            rows[focusedIndex].scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    function showKeyboardHelp() {
+        document.getElementById('keyboardHelp').classList.add('visible');
+    }
+
+    function hideKeyboardHelp() {
+        document.getElementById('keyboardHelp').classList.remove('visible');
     }
 
     return { init: init };

@@ -18,6 +18,10 @@ Perfect for local development and testing — capture emails your app sends with
 - **Sortable columns** — Click column headers to sort by From, Subject, or Date
 - **Browser notifications** — Desktop notifications for new messages (with permission prompt)
 - **Webhook support** — POST to a configurable URL when new messages arrive
+- **Message preview snippets** — See the first few lines of each message in the inbox
+- **Keyboard shortcuts** — j/k navigate, Enter open, Delete remove, Esc back, ? help
+- **HTML compatibility scoring** — Check email HTML against common client rendering rules
+- **Spam score analysis** — Built-in heuristic scorer with optional SpamAssassin integration
 - **Responsive UI** — Works on desktop, tablet, and mobile
 - **Dark/light theme** — Respects your OS `prefers-color-scheme` setting
 - **Hangfire-style DX** — Two lines of code to set up
@@ -186,6 +190,8 @@ The dashboard exposes a REST API under `{prefix}/api/`:
 | `GET` | `/mailpeek/api/messages/{id}/html` | HTML body (for iframe) |
 | `GET` | `/mailpeek/api/messages/{id}/attachments/{index}` | Download attachment |
 | `GET` | `/mailpeek/api/messages/{id}/links` | Link check results (202 while checking, 200 when complete) |
+| `GET` | `/mailpeek/api/messages/{id}/compatibility` | HTML compatibility score and issues |
+| `GET` | `/mailpeek/api/messages/{id}/spam` | Spam score analysis |
 | `PUT` | `/mailpeek/api/messages/{id}/read` | Mark message as read |
 | `PUT` | `/mailpeek/api/messages/{id}/tags` | Set message tags (JSON array body) |
 | `DELETE` | `/mailpeek/api/messages/{id}` | Delete message |

@@ -489,6 +489,17 @@ main {
     opacity: 0.8;
 }
 
+/* ── Message Snippet ────────────────────────────────────── */
+.msg-snippet {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 400px;
+    margin-top: 2px;
+}
+
 /* ── Link Status ─────────────────────────────────────────── */
 #linksTable { width: 100%; border-collapse: collapse; }
 #linksTable th, #linksTable td { padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 0.85rem; text-align: left; }
@@ -500,6 +511,59 @@ main {
 .link-status-timeout { color: #f59e0b; }
 .link-status-error { color: var(--danger); }
 #linksStatus { padding: 16px; color: var(--text-muted); font-style: italic; }
+
+/* ── Compatibility ──────────────────────────────────────── */
+.compat-score {
+    display: inline-block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+.compat-score.score-good { background: #22c55e22; color: #22c55e; }
+.compat-score.score-warn { background: #eab30822; color: #eab308; }
+.compat-score.score-bad { background: #ef444422; color: #ef4444; }
+
+.compat-issue {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-left: 3px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+}
+.compat-issue.severity-critical { border-left-color: #ef4444; }
+.compat-issue.severity-major { border-left-color: #eab308; }
+.compat-issue.severity-minor { border-left-color: #6b7280; }
+.compat-issue-title { font-weight: 600; font-size: 0.9rem; }
+.compat-issue-clients { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+
+/* ── Spam ──────────────────────────────────────────────── */
+.spam-score {
+    display: inline-block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+.spam-score.risk-low { background: #22c55e22; color: #22c55e; }
+.spam-score.risk-medium { background: #eab30822; color: #eab308; }
+.spam-score.risk-high { background: #ef444422; color: #ef4444; }
+.spam-source { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px; }
+
+.spam-rule {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: var(--bg);
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.spam-rule-name { font-weight: 600; font-size: 0.85rem; font-family: monospace; }
+.spam-rule-desc { font-size: 0.85rem; color: var(--text-muted); }
+.spam-rule-score { font-weight: 700; color: #ef4444; white-space: nowrap; }
 
 /* ── Checkbox Column ─────────────────────────────────────── */
 .col-checkbox {
@@ -517,6 +581,11 @@ main {
 
 #messageTable tbody tr.selected {
     background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+}
+
+#messageTable tbody tr.focused {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
 }
 
 /* ── Sortable Headers ────────────────────────────────────── */
@@ -572,6 +641,37 @@ main {
     font-size: 0.9rem;
 }
 
+/* ── Keyboard Help Overlay ────────────────────────────── */
+.keyboard-help-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 200;
+    justify-content: center;
+    align-items: center;
+}
+.keyboard-help-overlay.visible { display: flex; }
+.keyboard-help {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 24px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+.keyboard-help h3 { margin: 0 0 16px; }
+.keyboard-help table { width: 100%; }
+.keyboard-help kbd {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-family: monospace;
+    font-size: 0.85rem;
+}
+.keyboard-help td { padding: 4px 0; }
+
 /* ── Responsive ───────────────────────────────────────── */
 @media (max-width: 768px) {
     header {
@@ -623,6 +723,8 @@ main {
         font-size: 0.78rem;
         text-transform: uppercase;
     }
+
+    #messageTable tbody td .msg-snippet { display: none; }
 
     #messageTable tbody td.col-actions {
         display: flex;
