@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.4.0...v0.4.1) (2026-03-11)
+
+
+### Bug Fixes
+
+* prevent tab bar overflow on mobile detail view ([01e9364](https://github.com/MarcelRoozekrans/MailPeek/commit/01e936440acb9df9be46fc74b048a3ed40d480ff))
+
 ## [0.4.0](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.3.0...v0.4.0) (2026-03-11)
 
 
