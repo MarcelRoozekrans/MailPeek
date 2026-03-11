@@ -508,6 +508,32 @@ main {
 .link-status-error { color: var(--danger); }
 #linksStatus { padding: 16px; color: var(--text-muted); font-style: italic; }
 
+/* ── Compatibility ──────────────────────────────────────── */
+.compat-score {
+    display: inline-block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+.compat-score.score-good { background: #22c55e22; color: #22c55e; }
+.compat-score.score-warn { background: #eab30822; color: #eab308; }
+.compat-score.score-bad { background: #ef444422; color: #ef4444; }
+
+.compat-issue {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-left: 3px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+}
+.compat-issue.severity-critical { border-left-color: #ef4444; }
+.compat-issue.severity-major { border-left-color: #eab308; }
+.compat-issue.severity-minor { border-left-color: #6b7280; }
+.compat-issue-title { font-weight: 600; font-size: 0.9rem; }
+.compat-issue-clients { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+
 /* ── Checkbox Column ─────────────────────────────────────── */
 .col-checkbox {
     width: 40px;

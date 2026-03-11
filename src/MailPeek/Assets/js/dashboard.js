@@ -415,6 +415,15 @@ const Dashboard = (() => {
                 });
             }
 
+            // Compatibility
+            loadCompatibility(id);
+            if (connection) {
+                connection.off('HtmlCompatibilityCheckComplete');
+                connection.on('HtmlCompatibilityCheckComplete', function (completedId) {
+                    if (completedId === id) loadCompatibility(id);
+                });
+            }
+
             // Default to HTML tab
             switchTab('html');
         } catch (err) {
@@ -537,6 +546,41 @@ const Dashboard = (() => {
             });
         } catch (err) {
             console.error('Error loading links:', err);
+        }
+    }
+
+    // ── Load Compatibility ────────────────────────────────
+    async function loadCompatibility(id) {
+        var container = document.getElementById('compatibilityContent');
+        container.innerHTML = '<p class="text-muted">Checking compatibility...</p>';
+
+        try {
+            var resp = await fetch(pathPrefix + '/api/messages/' + id + '/compatibility');
+            if (resp.status === 202) {
+                container.innerHTML = '<p class="text-muted">Compatibility check in progress...</p>';
+                return;
+            }
+            var data = await resp.json();
+
+            var scoreClass = data.score >= 80 ? 'score-good' : data.score >= 50 ? 'score-warn' : 'score-bad';
+            var html = '<div class="compat-score ' + scoreClass + '">' + data.score + '/100</div>';
+
+            if (data.issues && data.issues.length > 0) {
+                html += '<div class="compat-issues">';
+                data.issues.forEach(function (issue) {
+                    html += '<div class="compat-issue severity-' + issue.severity.toLowerCase() + '">'
+                        + '<div class="compat-issue-title">' + escapeHtml(issue.description) + '</div>'
+                        + '<div class="compat-issue-clients">Affected: ' + escapeHtml(issue.affectedClients.join(', ')) + '</div>'
+                        + '</div>';
+                });
+                html += '</div>';
+            } else {
+                html += '<p class="text-muted">No compatibility issues found.</p>';
+            }
+
+            container.innerHTML = html;
+        } catch (err) {
+            console.error('Error loading compatibility:', err);
         }
     }
 
