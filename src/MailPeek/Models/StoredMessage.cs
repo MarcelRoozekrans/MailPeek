@@ -23,6 +23,8 @@ public class StoredMessage
     public List<LinkCheckResult>? LinkCheckResults { get; set; }
 #pragma warning restore MA0016
     public bool LinkCheckComplete { get; set; }
+    public HtmlCompatibilityResult? HtmlCompatibilityResult { get; set; }
+    public bool HtmlCompatibilityCheckComplete { get; set; }
 
     public bool HasAttachments => Attachments.Count > 0;
 
