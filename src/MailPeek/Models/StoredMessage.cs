@@ -25,6 +25,8 @@ public class StoredMessage
     public bool LinkCheckComplete { get; set; }
     public HtmlCompatibilityResult? HtmlCompatibilityResult { get; set; }
     public bool HtmlCompatibilityCheckComplete { get; set; }
+    public SpamCheckResult? SpamCheckResult { get; set; }
+    public bool SpamCheckComplete { get; set; }
 
     public bool HasAttachments => Attachments.Count > 0;
 
