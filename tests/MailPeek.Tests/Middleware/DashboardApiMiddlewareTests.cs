@@ -234,6 +234,21 @@ public class DashboardApiMiddlewareTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task GetMessages_SortsByFromAscending()
+    {
+        _store.Add(new StoredMessage { From = "charlie@t.com", To = ["r@t.com"], Subject = "C" });
+        _store.Add(new StoredMessage { From = "alice@t.com", To = ["r@t.com"], Subject = "A" });
+        _store.Add(new StoredMessage { From = "bob@t.com", To = ["r@t.com"], Subject = "B" });
+
+        var response = await _client!.GetAsync("/mailpeek/api/messages?sortBy=from&sortDesc=false");
+        var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var items = result.GetProperty("items");
+        Assert.Equal("alice@t.com", items[0].GetProperty("from").GetString());
+        Assert.Equal("bob@t.com", items[1].GetProperty("from").GetString());
+        Assert.Equal("charlie@t.com", items[2].GetProperty("from").GetString());
+    }
+
+    [Fact]
     public async Task GetLinks_Returns200WhenComplete()
     {
         var msg = new StoredMessage

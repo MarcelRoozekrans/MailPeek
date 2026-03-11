@@ -4,13 +4,20 @@ A NuGet package that provides an **in-memory fake SMTP server** with a **real-ti
 
 Perfect for local development and testing — capture emails your app sends without configuring a real mail server.
 
-![Dashboard Desktop](docs/regression-screenshots/2026-03-09-2038/inbox-desktop.png)
+![Dashboard Desktop](docs/regression-screenshots/2026-03-11-0550/inbox-desktop.png)
 
 ## Features
 
 - **Fake SMTP server** — Receives emails on a configurable port, no external mail server needed
 - **Real-time dashboard** — Messages appear instantly via SignalR
 - **Full MIME support** — HTML/text bodies, attachments, CC/BCC, headers (powered by MimeKit)
+- **Read/unread tracking** — Unread indicator dot, auto-marks as read on open
+- **Message tagging** — Add/remove tags per message, filter inbox by tag
+- **Link checking** — Automatic validation of URLs in message bodies
+- **Bulk operations** — Select multiple messages with checkboxes, bulk delete via floating action bar
+- **Sortable columns** — Click column headers to sort by From, Subject, or Date
+- **Browser notifications** — Desktop notifications for new messages (with permission prompt)
+- **Webhook support** — POST to a configurable URL when new messages arrive
 - **Responsive UI** — Works on desktop, tablet, and mobile
 - **Dark/light theme** — Respects your OS `prefers-color-scheme` setting
 - **Hangfire-style DX** — Two lines of code to set up
@@ -174,11 +181,15 @@ The dashboard exposes a REST API under `{prefix}/api/`:
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/mailpeek/api/messages` | List messages (paged: `?page=0&size=25&search=`) |
+| `GET` | `/mailpeek/api/messages` | List messages (paged: `?page=0&size=25&search=&tag=&sortBy=date&sortDesc=true`) |
 | `GET` | `/mailpeek/api/messages/{id}` | Message detail |
 | `GET` | `/mailpeek/api/messages/{id}/html` | HTML body (for iframe) |
 | `GET` | `/mailpeek/api/messages/{id}/attachments/{index}` | Download attachment |
+| `GET` | `/mailpeek/api/messages/{id}/links` | Link check results (202 while checking, 200 when complete) |
+| `PUT` | `/mailpeek/api/messages/{id}/read` | Mark message as read |
+| `PUT` | `/mailpeek/api/messages/{id}/tags` | Set message tags (JSON array body) |
 | `DELETE` | `/mailpeek/api/messages/{id}` | Delete message |
+| `DELETE` | `/mailpeek/api/messages/bulk` | Bulk delete (JSON body: `{"ids": [...]}`) |
 | `DELETE` | `/mailpeek/api/messages` | Clear all messages |
 
 ## Tech Stack

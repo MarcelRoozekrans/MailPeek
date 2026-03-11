@@ -31,7 +31,10 @@ public static class DashboardApiExtensions
             var search = context.Request.Query["search"].FirstOrDefault();
             var tag = context.Request.Query["tag"].FirstOrDefault();
 
-            var result = store.GetPage(page, size, search, tag);
+            var sortBy = context.Request.Query["sortBy"].FirstOrDefault();
+            var sortDesc = !bool.TryParse(context.Request.Query["sortDesc"], out var sd) || sd;
+
+            var result = store.GetPage(page, size, search, tag, sortBy, sortDesc);
             var unreadCount = store.GetUnreadCount();
             return Results.Json(new
             {
