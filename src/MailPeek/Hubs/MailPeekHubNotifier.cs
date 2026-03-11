@@ -32,4 +32,7 @@ public class MailPeekHubNotifier(
 
     public Task NotifyHtmlCompatibilityCheckComplete(Guid id) =>
         hubContext.Clients.All.SendAsync("HtmlCompatibilityCheckComplete", id);
+
+    public Task NotifySpamCheckComplete(Guid id) =>
+        hubContext.Clients.All.SendAsync("SpamCheckComplete", id);
 }
