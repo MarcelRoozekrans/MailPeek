@@ -67,6 +67,19 @@
             <button id="bulkDelete" class="btn btn-danger btn-sm">Delete</button>
             <button id="bulkClear" class="btn btn-sm">Clear selection</button>
         </div>
+        <div id="keyboardHelp" class="keyboard-help-overlay">
+            <div class="keyboard-help">
+                <h3>Keyboard Shortcuts</h3>
+                <table>
+                    <tr><td><kbd>j</kbd></td><td>Next message</td></tr>
+                    <tr><td><kbd>k</kbd></td><td>Previous message</td></tr>
+                    <tr><td><kbd>Enter</kbd></td><td>Open message</td></tr>
+                    <tr><td><kbd>Delete</kbd></td><td>Delete message</td></tr>
+                    <tr><td><kbd>Esc</kbd></td><td>Back to inbox / Close</td></tr>
+                    <tr><td><kbd>?</kbd></td><td>Show this help</td></tr>
+                </table>
+            </div>
+        </div>
     </main>
     <script src="{{PATH_PREFIX}}/assets/js/signalr.min.js"></script>
     <script src="{{PATH_PREFIX}}/assets/js/dashboard.js"></script>

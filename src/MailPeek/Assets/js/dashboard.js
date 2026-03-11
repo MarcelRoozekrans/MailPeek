@@ -8,6 +8,7 @@ const Dashboard = (() => {
     let selectedIds = new Set();
     let currentSort = 'date';
     let sortDescending = true;
+    let focusedIndex = -1;
 
     function init(prefix) {
         pathPrefix = prefix.replace(/\/+$/, '');
@@ -113,6 +114,11 @@ const Dashboard = (() => {
         document.getElementById('bulkDelete').addEventListener('click', bulkDelete);
         document.getElementById('bulkClear').addEventListener('click', clearSelection);
 
+        document.addEventListener('keydown', handleKeyDown);
+        document.getElementById('keyboardHelp').addEventListener('click', function (e) {
+            if (e.target.id === 'keyboardHelp') hideKeyboardHelp();
+        });
+
         // Sortable column headers
         document.querySelectorAll('#messageTable thead th.sortable').forEach(function (th) {
             th.addEventListener('click', function () {
@@ -163,6 +169,7 @@ const Dashboard = (() => {
         }
 
         tbody.innerHTML = '';
+        focusedIndex = -1;
 
         if (items.length === 0) {
             table.classList.add('hidden');
@@ -615,6 +622,76 @@ const Dashboard = (() => {
                 if (arrow) arrow.remove();
             }
         });
+    }
+
+    // ── Keyboard Navigation ──────────────────────────────
+    function handleKeyDown(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        var rows = document.querySelectorAll('#messageTable tbody tr');
+        var detailVisible = document.getElementById('messageDetail').style.display !== 'none';
+
+        switch (e.key) {
+            case 'j':
+                e.preventDefault();
+                if (!detailVisible && rows.length > 0) {
+                    focusedIndex = Math.min(focusedIndex + 1, rows.length - 1);
+                    updateFocusedRow(rows);
+                }
+                break;
+            case 'k':
+                e.preventDefault();
+                if (!detailVisible && rows.length > 0) {
+                    focusedIndex = Math.max(focusedIndex - 1, 0);
+                    updateFocusedRow(rows);
+                }
+                break;
+            case 'Enter':
+                if (!detailVisible && focusedIndex >= 0 && focusedIndex < rows.length) {
+                    e.preventDefault();
+                    rows[focusedIndex].click();
+                }
+                break;
+            case 'Delete':
+            case 'Backspace':
+                if (!detailVisible && focusedIndex >= 0 && focusedIndex < rows.length) {
+                    e.preventDefault();
+                    var deleteBtn = rows[focusedIndex].querySelector('.btn-delete-row');
+                    if (deleteBtn) deleteBtn.click();
+                    if (focusedIndex >= rows.length - 1) focusedIndex = rows.length - 2;
+                }
+                break;
+            case 'Escape':
+                if (document.getElementById('keyboardHelp').classList.contains('visible')) {
+                    hideKeyboardHelp();
+                } else if (detailVisible) {
+                    e.preventDefault();
+                    document.getElementById('backToInbox').click();
+                }
+                break;
+            case '?':
+                if (!detailVisible) {
+                    e.preventDefault();
+                    showKeyboardHelp();
+                }
+                break;
+        }
+    }
+
+    function updateFocusedRow(rows) {
+        rows.forEach(function (r) { r.classList.remove('focused'); });
+        if (focusedIndex >= 0 && focusedIndex < rows.length) {
+            rows[focusedIndex].classList.add('focused');
+            rows[focusedIndex].scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    function showKeyboardHelp() {
+        document.getElementById('keyboardHelp').classList.add('visible');
+    }
+
+    function hideKeyboardHelp() {
+        document.getElementById('keyboardHelp').classList.remove('visible');
     }
 
     return { init: init };

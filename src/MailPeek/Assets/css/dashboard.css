@@ -526,6 +526,11 @@ main {
     background: color-mix(in srgb, var(--primary) 8%, var(--surface));
 }
 
+#messageTable tbody tr.focused {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}
+
 /* ── Sortable Headers ────────────────────────────────────── */
 #messageTable thead th.sortable {
     cursor: pointer;
@@ -578,6 +583,37 @@ main {
     font-weight: 600;
     font-size: 0.9rem;
 }
+
+/* ── Keyboard Help Overlay ────────────────────────────── */
+.keyboard-help-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 200;
+    justify-content: center;
+    align-items: center;
+}
+.keyboard-help-overlay.visible { display: flex; }
+.keyboard-help {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 24px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+.keyboard-help h3 { margin: 0 0 16px; }
+.keyboard-help table { width: 100%; }
+.keyboard-help kbd {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-family: monospace;
+    font-size: 0.85rem;
+}
+.keyboard-help td { padding: 4px 0; }
 
 /* ── Responsive ───────────────────────────────────────── */
 @media (max-width: 768px) {
