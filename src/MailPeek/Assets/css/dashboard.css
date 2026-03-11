@@ -534,6 +534,33 @@ main {
 .compat-issue-title { font-weight: 600; font-size: 0.9rem; }
 .compat-issue-clients { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
 
+/* ── Spam ──────────────────────────────────────────────── */
+.spam-score {
+    display: inline-block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+.spam-score.risk-low { background: #22c55e22; color: #22c55e; }
+.spam-score.risk-medium { background: #eab30822; color: #eab308; }
+.spam-score.risk-high { background: #ef444422; color: #ef4444; }
+.spam-source { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px; }
+
+.spam-rule {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: var(--bg);
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.spam-rule-name { font-weight: 600; font-size: 0.85rem; font-family: monospace; }
+.spam-rule-desc { font-size: 0.85rem; color: var(--text-muted); }
+.spam-rule-score { font-weight: 700; color: #ef4444; white-space: nowrap; }
+
 /* ── Checkbox Column ─────────────────────────────────────── */
 .col-checkbox {
     width: 40px;

@@ -424,6 +424,15 @@ const Dashboard = (() => {
                 });
             }
 
+            // Spam
+            loadSpam(id);
+            if (connection) {
+                connection.off('SpamCheckComplete');
+                connection.on('SpamCheckComplete', function (completedId) {
+                    if (completedId === id) loadSpam(id);
+                });
+            }
+
             // Default to HTML tab
             switchTab('html');
         } catch (err) {
@@ -581,6 +590,42 @@ const Dashboard = (() => {
             container.innerHTML = html;
         } catch (err) {
             console.error('Error loading compatibility:', err);
+        }
+    }
+
+    // ── Load Spam ─────────────────────────────────────────
+    async function loadSpam(id) {
+        var container = document.getElementById('spamContent');
+        container.innerHTML = '<p class="text-muted">Checking spam score...</p>';
+
+        try {
+            var resp = await fetch(pathPrefix + '/api/messages/' + id + '/spam');
+            if (resp.status === 202) {
+                container.innerHTML = '<p class="text-muted">Spam analysis in progress...</p>';
+                return;
+            }
+            var data = await resp.json();
+
+            var riskClass = data.score <= 5 ? 'risk-low' : data.score <= 12 ? 'risk-medium' : 'risk-high';
+            var riskLabel = data.score <= 5 ? 'Low Risk' : data.score <= 12 ? 'Medium Risk' : 'High Risk';
+            var html = '<div class="spam-score ' + riskClass + '">' + data.score.toFixed(1) + ' \u2014 ' + riskLabel + '</div>';
+            html += '<div class="spam-source">Source: ' + escapeHtml(data.source) + '</div>';
+
+            if (data.rules && data.rules.length > 0) {
+                data.rules.forEach(function (rule) {
+                    html += '<div class="spam-rule">'
+                        + '<div><span class="spam-rule-name">' + escapeHtml(rule.name) + '</span><br>'
+                        + '<span class="spam-rule-desc">' + escapeHtml(rule.description) + '</span></div>'
+                        + '<div class="spam-rule-score">+' + rule.score.toFixed(1) + '</div>'
+                        + '</div>';
+                });
+            } else {
+                html += '<p class="text-muted">No spam indicators found.</p>';
+            }
+
+            container.innerHTML = html;
+        } catch (err) {
+            console.error('Error loading spam:', err);
         }
     }
 
