@@ -21,6 +21,9 @@ public class MailPeekHubNotifier(
     public Task NotifyMessageDeleted(Guid id) =>
         hubContext.Clients.All.SendAsync("MessageDeleted", id);
 
+    public Task NotifyMessagesDeleted(IReadOnlyList<Guid> ids) =>
+        hubContext.Clients.All.SendAsync("MessagesDeleted", ids);
+
     public Task NotifyMessagesCleared() =>
         hubContext.Clients.All.SendAsync("MessagesCleared");
 

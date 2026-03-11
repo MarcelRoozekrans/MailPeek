@@ -23,10 +23,11 @@
             <table id="messageTable">
                 <thead>
                     <tr>
-                        <th>From</th>
+                        <th class="col-checkbox"><input type="checkbox" id="selectAll" title="Select all" /></th>
+                        <th class="sortable" data-sort="from">From</th>
                         <th>To</th>
-                        <th>Subject</th>
-                        <th>Date</th>
+                        <th class="sortable" data-sort="subject">Subject</th>
+                        <th class="sortable active" data-sort="date">Date <span class="sort-arrow">&#9660;</span></th>
                         <th><span class="sr-only">Actions</span></th>
                     </tr>
                 </thead>
@@ -60,6 +61,11 @@
                     </table>
                 </div>
             </div>
+        </div>
+        <div id="bulkBar" class="bulk-bar hidden">
+            <span id="bulkCount">0 selected</span>
+            <button id="bulkDelete" class="btn btn-danger btn-sm">Delete</button>
+            <button id="bulkClear" class="btn btn-sm">Clear selection</button>
         </div>
     </main>
     <script src="{{PATH_PREFIX}}/assets/js/signalr.min.js"></script>

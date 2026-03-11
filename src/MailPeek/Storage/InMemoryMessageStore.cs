@@ -61,6 +61,24 @@ public class InMemoryMessageStore(int maxMessages = 1000) : IMessageStore
         return true;
     }
 
+    public int DeleteMany(IReadOnlyList<Guid> ids)
+    {
+        var count = 0;
+        lock (_orderLock)
+        {
+            foreach (var id in ids)
+            {
+                if (_messages.TryRemove(id, out _))
+                {
+                    _order.Remove(id);
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
     public bool MarkAsRead(Guid id)
     {
         if (!_messages.TryGetValue(id, out var message))
@@ -90,7 +108,7 @@ public class InMemoryMessageStore(int maxMessages = 1000) : IMessageStore
         _messages.Clear();
     }
 
-    public PagedResult<StoredMessage> GetPage(int pageNumber, int pageSize, string? searchTerm = null, string? tag = null)
+    public PagedResult<StoredMessage> GetPage(int pageNumber, int pageSize, string? searchTerm = null, string? tag = null, string? sortBy = null, bool sortDescending = true)
     {
         var all = GetAll();
 
@@ -110,6 +128,23 @@ public class InMemoryMessageStore(int maxMessages = 1000) : IMessageStore
         }
 
         var list = filtered.ToList();
+
+        if (!string.IsNullOrWhiteSpace(sortBy))
+        {
+            list = sortBy.ToLowerInvariant() switch
+            {
+                "from" => sortDescending
+                    ? list.OrderByDescending(m => m.From, StringComparer.OrdinalIgnoreCase).ToList()
+                    : list.OrderBy(m => m.From, StringComparer.OrdinalIgnoreCase).ToList(),
+                "subject" => sortDescending
+                    ? list.OrderByDescending(m => m.Subject, StringComparer.OrdinalIgnoreCase).ToList()
+                    : list.OrderBy(m => m.Subject, StringComparer.OrdinalIgnoreCase).ToList(),
+                "date" => sortDescending
+                    ? list.OrderByDescending(m => m.ReceivedAt).ToList()
+                    : list.OrderBy(m => m.ReceivedAt).ToList(),
+                _ => list
+            };
+        }
 
         return new PagedResult<StoredMessage>
         {

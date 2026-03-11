@@ -8,11 +8,12 @@ public interface IMessageStore
     IReadOnlyList<StoredMessage> GetAll();
     StoredMessage? GetById(Guid id);
     bool Delete(Guid id);
+    int DeleteMany(IReadOnlyList<Guid> ids);
     bool MarkAsRead(Guid id);
     bool SetTags(Guid id, IList<string> tags);
     void Clear();
     int GetUnreadCount();
-    PagedResult<StoredMessage> GetPage(int pageNumber, int pageSize, string? searchTerm = null, string? tag = null);
+    PagedResult<StoredMessage> GetPage(int pageNumber, int pageSize, string? searchTerm = null, string? tag = null, string? sortBy = null, bool sortDescending = true);
 #pragma warning disable MA0046
     event Action<StoredMessage>? OnMessageReceived;
 #pragma warning restore MA0046

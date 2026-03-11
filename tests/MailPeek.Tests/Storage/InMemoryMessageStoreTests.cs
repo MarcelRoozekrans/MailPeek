@@ -68,6 +68,46 @@ public class InMemoryMessageStoreTests
     }
 
     [Fact]
+    public void DeleteMany_RemovesMultipleMessages()
+    {
+        var msg1 = CreateMessage("a@test.com", "First");
+        var msg2 = CreateMessage("b@test.com", "Second");
+        var msg3 = CreateMessage("c@test.com", "Third");
+        _store.Add(msg1);
+        _store.Add(msg2);
+        _store.Add(msg3);
+
+        var deleted = _store.DeleteMany([msg1.Id, msg3.Id]);
+        Assert.Equal(2, deleted);
+#pragma warning disable HLQ005
+        var remaining = Assert.Single(_store.GetAll());
+#pragma warning restore HLQ005
+        Assert.Equal("Second", remaining.Subject);
+    }
+
+    [Fact]
+    public void DeleteMany_IgnoresMissingIds()
+    {
+        var msg = CreateMessage("a@test.com", "First");
+        _store.Add(msg);
+
+        var deleted = _store.DeleteMany([msg.Id, Guid.NewGuid()]);
+        Assert.Equal(1, deleted);
+        Assert.Empty(_store.GetAll());
+    }
+
+    [Fact]
+    public void DeleteMany_ReturnsZeroForEmptyList()
+    {
+        _store.Add(CreateMessage("a@test.com", "First"));
+        var deleted = _store.DeleteMany([]);
+        Assert.Equal(0, deleted);
+#pragma warning disable HLQ005
+        Assert.Single(_store.GetAll());
+#pragma warning restore HLQ005
+    }
+
+    [Fact]
     public void Clear_RemovesAllMessages()
     {
         _store.Add(CreateMessage("a@test.com", "First"));
@@ -164,6 +204,65 @@ public class InMemoryMessageStoreTests
         Assert.Single(page.Items);
 #pragma warning restore HLQ005
         Assert.Equal("Tagged", page.Items[0].Subject);
+    }
+
+    [Fact]
+    public void GetPage_SortsByFromAscending()
+    {
+        var store = new InMemoryMessageStore(maxMessages: 20);
+        store.Add(CreateMessage("charlie@test.com", "C"));
+        store.Add(CreateMessage("alice@test.com", "A"));
+        store.Add(CreateMessage("bob@test.com", "B"));
+
+        var page = store.GetPage(0, 10, sortBy: "from", sortDescending: false);
+        Assert.Equal("alice@test.com", page.Items[0].From);
+        Assert.Equal("bob@test.com", page.Items[1].From);
+        Assert.Equal("charlie@test.com", page.Items[2].From);
+    }
+
+    [Fact]
+    public void GetPage_SortsBySubjectDescending()
+    {
+        var store = new InMemoryMessageStore(maxMessages: 20);
+        store.Add(CreateMessage("a@test.com", "Alpha"));
+        store.Add(CreateMessage("b@test.com", "Charlie"));
+        store.Add(CreateMessage("c@test.com", "Bravo"));
+
+        var page = store.GetPage(0, 10, sortBy: "subject", sortDescending: true);
+        Assert.Equal("Charlie", page.Items[0].Subject);
+        Assert.Equal("Bravo", page.Items[1].Subject);
+        Assert.Equal("Alpha", page.Items[2].Subject);
+    }
+
+    [Fact]
+    public void GetPage_SortsByDateAscending()
+    {
+        var store = new InMemoryMessageStore(maxMessages: 20);
+        var msg1 = CreateMessage("a@test.com", "Old");
+        msg1.ReceivedAt = new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        var msg2 = CreateMessage("b@test.com", "New");
+        msg2.ReceivedAt = new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero);
+        store.Add(msg1);
+        store.Add(msg2);
+
+        var page = store.GetPage(0, 10, sortBy: "date", sortDescending: false);
+        Assert.Equal("Old", page.Items[0].Subject);
+        Assert.Equal("New", page.Items[1].Subject);
+    }
+
+    [Fact]
+    public void GetPage_DefaultSortIsDateDescending()
+    {
+        var store = new InMemoryMessageStore(maxMessages: 20);
+        var msg1 = CreateMessage("a@test.com", "Old");
+        msg1.ReceivedAt = new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        var msg2 = CreateMessage("b@test.com", "New");
+        msg2.ReceivedAt = new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero);
+        store.Add(msg1);
+        store.Add(msg2);
+
+        var page = store.GetPage(0, 10);
+        Assert.Equal("New", page.Items[0].Subject);
     }
 
     private static StoredMessage CreateMessage(string from, string subject) => new()

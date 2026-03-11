@@ -17,8 +17,8 @@ Pick from this list when planning the next sprint.
 
 - [x] **Read/unread status** — Visual indicator for unseen messages, bold row styling (P1)
 - [x] **Browser notifications** — Desktop notification when new email arrives via SignalR (P1)
-- [ ] **Bulk operations** — Checkbox selection, bulk delete (P1)
-- [ ] **Sort options** — Sort by date, sender, subject (ascending/descending) (P1)
+- [x] **Bulk operations** — Checkbox selection, bulk delete (P1)
+- [x] **Sort options** — Sort by date, sender, subject (ascending/descending) (P1)
 - [ ] **Message preview snippet** — Show first ~100 chars of body in inbox row (P2)
 - [ ] **Keyboard shortcuts** — j/k navigate, Enter open, Delete remove, Esc back (P2)
 - [ ] **Dark/light theme toggle** — Manual override in addition to OS prefers-color-scheme (P3)

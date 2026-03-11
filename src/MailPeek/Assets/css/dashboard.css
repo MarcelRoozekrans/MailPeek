@@ -240,7 +240,7 @@ main {
     font-weight: 600;
 }
 
-#messageTable tbody tr.unread td:first-child::after {
+#messageTable tbody tr.unread td:nth-child(2)::after {
     content: '';
     display: inline-block;
     width: 8px;
@@ -497,6 +497,77 @@ main {
 .link-status-error { color: var(--danger); }
 #linksStatus { padding: 16px; color: var(--text-muted); font-style: italic; }
 
+/* ── Checkbox Column ─────────────────────────────────────── */
+.col-checkbox {
+    width: 40px;
+    text-align: center;
+}
+
+.col-checkbox input[type="checkbox"],
+.row-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+#messageTable tbody tr.selected {
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+}
+
+/* ── Sortable Headers ────────────────────────────────────── */
+#messageTable thead th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+}
+
+#messageTable thead th.sortable:hover {
+    color: var(--primary);
+}
+
+.sort-arrow {
+    font-size: 0.7rem;
+    margin-left: 4px;
+    opacity: 0.6;
+}
+
+#messageTable thead th.sortable.active {
+    color: var(--primary);
+}
+
+#messageTable thead th.sortable.active .sort-arrow {
+    opacity: 1;
+}
+
+/* ── Bulk Action Bar ─────────────────────────────────────── */
+.bulk-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px 24px;
+    background: var(--header-bg);
+    color: var(--header-text);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(100%);
+    transition: transform 0.2s ease;
+}
+
+.bulk-bar.visible {
+    transform: translateY(0);
+}
+
+.bulk-bar #bulkCount {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
 /* ── Responsive ───────────────────────────────────────── */
 @media (max-width: 768px) {
     header {
@@ -534,6 +605,10 @@ main {
         padding: 2px 0;
         border: none;
         max-width: none;
+    }
+
+    #messageTable tbody td.col-checkbox {
+        display: none;
     }
 
     #messageTable tbody td::before {
