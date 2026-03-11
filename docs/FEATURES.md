@@ -19,16 +19,16 @@ Pick from this list when planning the next sprint.
 - [x] **Browser notifications** — Desktop notification when new email arrives via SignalR (P1)
 - [x] **Bulk operations** — Checkbox selection, bulk delete (P1)
 - [x] **Sort options** — Sort by date, sender, subject (ascending/descending) (P1)
-- [ ] **Message preview snippet** — Show first ~100 chars of body in inbox row (P2)
-- [ ] **Keyboard shortcuts** — j/k navigate, Enter open, Delete remove, Esc back (P2)
+- [x] **Message preview snippet** — Show first ~100 chars of body in inbox row (P2)
+- [x] **Keyboard shortcuts** — j/k navigate, Enter open, Delete remove, Esc back (P2)
 - [ ] **Dark/light theme toggle** — Manual override in addition to OS prefers-color-scheme (P3)
 - [ ] **Column customization** — Show/hide columns in inbox table (P3)
 
 ## Email Analysis & Testing
 
 - [x] **Link checking** — Validate all URLs in HTML/text body, report broken links (P1)
-- [ ] **HTML compatibility scoring** — Score email HTML against common client rendering rules (P2)
-- [ ] **SpamAssassin integration** — Spam score analysis with fix suggestions (P2)
+- [x] **HTML compatibility scoring** — Score email HTML against common client rendering rules (P2)
+- [x] **SpamAssassin integration** — Spam score analysis with fix suggestions (P2)
 - [ ] **List-Unsubscribe validation** — Check unsubscribe header syntax (P3)
 - [ ] **Screenshot generation** — Render HTML email to image for visual inspection (P3)
 - [ ] **Accessibility check** — Validate email HTML for screen reader compatibility (P3)
