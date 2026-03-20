@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.4.1...v0.5.0) (2026-03-20)
+
+
+### Features
+
+* add NuGet publish on release ([b9657d0](https://github.com/MarcelRoozekrans/MailPeek/commit/b9657d013557c45c2a0fe4471dd5edb770d182bf))
+* add NuGet publish on release ([b59ca97](https://github.com/MarcelRoozekrans/MailPeek/commit/b59ca9703e5bf03cd7bd5ba51b53ac011f058bbc))
+
 ## [0.4.1](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.4.0...v0.4.1) (2026-03-11)
 
 
