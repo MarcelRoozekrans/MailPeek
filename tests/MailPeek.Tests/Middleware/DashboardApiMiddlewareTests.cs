@@ -321,4 +321,34 @@ public class DashboardApiMiddlewareTests : IAsyncLifetime
         var response = await _client!.GetAsync($"/mailpeek/api/messages/{Guid.NewGuid()}/spam");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task GetHtml_RewritesCidUrls()
+    {
+        var msg = new StoredMessage
+        {
+            From = "test@test.com",
+            To = ["r@test.com"],
+            Subject = "CID Test",
+            HtmlBody = "<html><body><img src=\"cid:image1\"></body></html>",
+            Attachments =
+            [
+                new StoredAttachment
+                {
+                    FileName = "image1.png",
+                    ContentType = "image/png",
+                    Content = [1, 2, 3],
+                    ContentId = "image1"
+                }
+            ]
+        };
+        _store.Add(msg);
+
+        var response = await _client!.GetAsync($"/mailpeek/api/messages/{msg.Id}/html");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var html = await response.Content.ReadAsStringAsync();
+        Assert.Contains($"/mailpeek/api/messages/{msg.Id}/attachments/0", html);
+        Assert.DoesNotContain("cid:image1", html);
+    }
 }

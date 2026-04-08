@@ -55,8 +55,22 @@ public static class DashboardApiExtensions
             var msg = store.GetById(id);
             if (msg is null) { context.Response.StatusCode = 404; return; }
 
+            var html = msg.HtmlBody ?? "<em>No HTML body</em>";
+
+            for (var i = 0; i < msg.Attachments.Count; i++)
+            {
+                var attachment = msg.Attachments[i];
+                if (!string.IsNullOrEmpty(attachment.ContentId))
+                {
+                    // Clean content ID: MimeKit often keeps the < > brackets
+                    var cid = attachment.ContentId.Trim('<', '>');
+                    var attachmentUrl = $"{api}/messages/{id}/attachments/{i}";
+                    html = html.Replace($"cid:{cid}", attachmentUrl, StringComparison.OrdinalIgnoreCase);
+                }
+            }
+
             context.Response.ContentType = "text/html; charset=utf-8";
-            await context.Response.WriteAsync(msg.HtmlBody ?? "<em>No HTML body</em>").ConfigureAwait(false);
+            await context.Response.WriteAsync(html).ConfigureAwait(false);
         });
 
         endpoints.MapGet($"{api}/messages/{{id:guid}}/attachments/{{index:int}}", async (Guid id, int index, HttpContext context, IMessageStore store) =>

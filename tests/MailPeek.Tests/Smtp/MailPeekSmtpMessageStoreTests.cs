@@ -94,6 +94,36 @@ public class MailPeekSmtpMessageStoreTests
     }
 
     [Fact]
+    public async Task ParseAndStore_ParsesCidImages()
+    {
+        var store = new InMemoryMessageStore();
+        var handler = new MailPeekSmtpMessageStore(store);
+
+        var mime = new MimeMessage();
+        mime.From.Add(new MailboxAddress("Sender", "sender@test.com"));
+        mime.To.Add(new MailboxAddress("Recipient", "recipient@test.com"));
+        mime.Subject = "CID Test";
+
+        var builder = new BodyBuilder
+        {
+            HtmlBody = "<h1>Hello</h1><img src=\"cid:myimage\">"
+        };
+        var image = builder.LinkedResources.Add("test.png", [0, 1, 2, 3], new ContentType("image", "png"));
+        image.ContentId = "myimage";
+        mime.Body = builder.ToMessageBody();
+
+        using var stream = new MemoryStream();
+        await mime.WriteToAsync(stream);
+
+        handler.ParseAndStore(stream.ToArray());
+
+        var msg = store.GetAll().First();
+        Assert.Single(msg.Attachments);
+        Assert.Equal("myimage", msg.Attachments[0].ContentId);
+        Assert.Equal("image/png", msg.Attachments[0].ContentType);
+    }
+
+    [Fact]
     public void ParseAndStore_HandlesMalformedMessage()
     {
         var store = new InMemoryMessageStore();
