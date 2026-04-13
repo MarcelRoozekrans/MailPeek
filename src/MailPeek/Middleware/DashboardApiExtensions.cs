@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -63,9 +64,13 @@ public static class DashboardApiExtensions
                 if (!string.IsNullOrEmpty(attachment.ContentId))
                 {
                     // Clean content ID: MimeKit often keeps the < > brackets
-                    var cid = attachment.ContentId.Trim('<', '>');
+                    var cid = Regex.Escape(attachment.ContentId.Trim('<', '>'));
                     var attachmentUrl = $"{api}/messages/{id}/attachments/{i}";
-                    html = html.Replace($"cid:{cid}", attachmentUrl, StringComparison.OrdinalIgnoreCase);
+                    // Match the whole cid: token — use a lookahead boundary so cid:image1
+                    // does not accidentally replace cid:image10, cid:image1-extra, etc.
+                    // Timeout guards against ReDoS on malformed input.
+                    html = Regex.Replace(html, $@"cid:{cid}(?=[""'\s>]|$)", attachmentUrl,
+                        RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
                 }
             }
 
@@ -84,7 +89,12 @@ public static class DashboardApiExtensions
 
             var attachment = msg.Attachments[index];
             context.Response.ContentType = attachment.ContentType;
-            context.Response.Headers.ContentDisposition = $"attachment; filename=\"{attachment.FileName}\"";
+            // CID/inline resources must use disposition=inline so browsers render them
+            // inside <img> tags rather than triggering a file download.
+            var disposition = string.IsNullOrEmpty(attachment.ContentId)
+                ? $"attachment; filename=\"{attachment.FileName}\""
+                : $"inline; filename=\"{attachment.FileName}\"";
+            context.Response.Headers.ContentDisposition = disposition;
             await context.Response.Body.WriteAsync(attachment.Content).ConfigureAwait(false);
         });
 
