@@ -88,7 +88,9 @@ public class MailPeekSmtpMessageStoreTests
         var msg = store.GetAll().First();
         Assert.True(msg.HasAttachments);
 #pragma warning disable HLQ005
+#pragma warning disable HLQ005 // Assert.Single is an xUnit assertion, not LINQ
         Assert.Single(msg.Attachments);
+#pragma warning restore HLQ005
 #pragma warning restore HLQ005
         Assert.Equal("test.txt", msg.Attachments[0].FileName);
     }
@@ -118,7 +120,9 @@ public class MailPeekSmtpMessageStoreTests
         handler.ParseAndStore(stream.ToArray());
 
         var msg = store.GetAll().First();
+#pragma warning disable HLQ005 // Assert.Single is an xUnit assertion, not LINQ
         Assert.Single(msg.Attachments);
+#pragma warning restore HLQ005
         Assert.Equal("myimage", msg.Attachments[0].ContentId);
         Assert.Equal("image/png", msg.Attachments[0].ContentType);
     }
