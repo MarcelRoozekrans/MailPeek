@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.1](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.5.0...v0.5.1) (2026-04-13)
+
+
+### Bug Fixes
+
+* address PR review comments on CID image handling ([db740cd](https://github.com/MarcelRoozekrans/MailPeek/commit/db740cd49e36eb3ae8ce54a7d6574c3a640ae673))
+* suppress HLQ005 on Assert.Single (xUnit assertion, not LINQ) ([59d7ebb](https://github.com/MarcelRoozekrans/MailPeek/commit/59d7ebbd86a5082ee78edbe1d75297daa9cc9e27))
+
 ## [0.5.0](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.4.1...v0.5.0) (2026-03-20)
 
 
