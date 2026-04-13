@@ -43,19 +43,23 @@ public class MailPeekSmtpMessageStore(MailPeek.Storage.IMessageStore messageStor
                 storedMessage.Headers[header.Field] = header.Value;
             }
 
-            foreach (var attachment in mime.Attachments)
+            foreach (var part in mime.BodyParts)
             {
-                if (attachment is MimePart part)
+                if (part.IsAttachment || (part is MimePart mimePart && !string.IsNullOrEmpty(mimePart.ContentId)))
                 {
-                    using var ms = new MemoryStream();
-                    part.Content?.DecodeTo(ms);
-
-                    storedMessage.Attachments.Add(new StoredAttachment
+                    if (part is MimePart mPart)
                     {
-                        FileName = part.FileName ?? "unknown",
-                        ContentType = part.ContentType.MimeType,
-                        Content = ms.ToArray()
-                    });
+                        using var ms = new MemoryStream();
+                        mPart.Content?.DecodeTo(ms);
+
+                        storedMessage.Attachments.Add(new StoredAttachment
+                        {
+                            FileName = mPart.FileName ?? "unknown",
+                            ContentType = mPart.ContentType.MimeType,
+                            Content = ms.ToArray(),
+                            ContentId = mPart.ContentId
+                        });
+                    }
                 }
             }
         }

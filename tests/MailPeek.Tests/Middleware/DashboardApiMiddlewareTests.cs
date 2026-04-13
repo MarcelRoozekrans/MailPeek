@@ -321,4 +321,108 @@ public class DashboardApiMiddlewareTests : IAsyncLifetime
         var response = await _client!.GetAsync($"/mailpeek/api/messages/{Guid.NewGuid()}/spam");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task GetHtml_RewritesCidUrls()
+    {
+        var msg = new StoredMessage
+        {
+            From = "test@test.com",
+            To = ["r@test.com"],
+            Subject = "CID Test",
+            HtmlBody = "<html><body><img src=\"cid:image1\"></body></html>",
+            Attachments =
+            [
+                new StoredAttachment
+                {
+                    FileName = "image1.png",
+                    ContentType = "image/png",
+                    Content = [1, 2, 3],
+                    ContentId = "image1"
+                }
+            ]
+        };
+        _store.Add(msg);
+
+        var response = await _client!.GetAsync($"/mailpeek/api/messages/{msg.Id}/html");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var html = await response.Content.ReadAsStringAsync();
+        Assert.Contains($"/mailpeek/api/messages/{msg.Id}/attachments/0", html, StringComparison.Ordinal);
+        Assert.DoesNotContain("cid:image1", html, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task GetHtml_DoesNotRewriteCidUrlsWithSharedPrefix()
+    {
+        // cid:image1 must not accidentally replace cid:image10
+        var msg = new StoredMessage
+        {
+            From = "test@test.com",
+            To = ["r@test.com"],
+            Subject = "CID Prefix Test",
+            HtmlBody = "<img src=\"cid:image1\"><img src=\"cid:image10\">",
+            Attachments =
+            [
+                new StoredAttachment
+                {
+                    FileName = "image1.png",
+                    ContentType = "image/png",
+                    Content = [1],
+                    ContentId = "image1"
+                },
+                new StoredAttachment
+                {
+                    FileName = "image10.png",
+                    ContentType = "image/png",
+                    Content = [2],
+                    ContentId = "image10"
+                }
+            ]
+        };
+        _store.Add(msg);
+
+        var response = await _client!.GetAsync($"/mailpeek/api/messages/{msg.Id}/html");
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Contains($"/mailpeek/api/messages/{msg.Id}/attachments/0", html, StringComparison.Ordinal);
+        Assert.Contains($"/mailpeek/api/messages/{msg.Id}/attachments/1", html, StringComparison.Ordinal);
+        Assert.DoesNotContain("cid:image1", html, StringComparison.Ordinal);
+        Assert.DoesNotContain("cid:image10", html, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task GetAttachment_UsesInlineDispositionForCidAttachments()
+    {
+        var msg = new StoredMessage
+        {
+            From = "test@test.com",
+            To = ["r@test.com"],
+            Subject = "Disposition Test",
+            Attachments =
+            [
+                new StoredAttachment
+                {
+                    FileName = "image.png",
+                    ContentType = "image/png",
+                    Content = [1, 2, 3],
+                    ContentId = "image1"
+                },
+                new StoredAttachment
+                {
+                    FileName = "document.pdf",
+                    ContentType = "application/pdf",
+                    Content = [4, 5, 6],
+                    ContentId = null
+                }
+            ]
+        };
+        _store.Add(msg);
+
+        var cidResponse = await _client!.GetAsync($"/mailpeek/api/messages/{msg.Id}/attachments/0");
+        Assert.StartsWith("inline", cidResponse.Content.Headers.ContentDisposition?.ToString(), StringComparison.OrdinalIgnoreCase);
+
+        var regularResponse = await _client!.GetAsync($"/mailpeek/api/messages/{msg.Id}/attachments/1");
+        Assert.StartsWith("attachment", regularResponse.Content.Headers.ContentDisposition?.ToString(), StringComparison.OrdinalIgnoreCase);
+    }
 }
