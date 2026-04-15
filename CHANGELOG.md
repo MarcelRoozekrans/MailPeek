@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.2](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.5.1...v0.5.2) (2026-04-15)
+
+
+### Bug Fixes
+
+* remove premature NuGet push from CI to prevent stale stable packages ([2085af7](https://github.com/MarcelRoozekrans/MailPeek/commit/2085af7ba8dde2806d00abb0b2a3c360e7c887dd))
+
 ## [0.5.1](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.5.0...v0.5.1) (2026-04-13)
 
 
