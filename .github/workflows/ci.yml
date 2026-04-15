@@ -47,6 +47,3 @@ jobs:
           dotnet pack src/MailPeek/MailPeek.csproj --no-build -c Release -p:PackageVersion=${{ steps.gitversion.outputs.version }} -o ./artifacts
           dotnet pack src/MailPeek.Hosting.Aspire/MailPeek.Hosting.Aspire.csproj --no-build -c Release -p:PackageVersion=${{ steps.gitversion.outputs.version }} -o ./artifacts
 
-      - name: Push to NuGet (pre-release)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
