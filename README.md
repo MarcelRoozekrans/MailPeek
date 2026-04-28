@@ -1,5 +1,8 @@
 # MailPeek
 
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/MarcelRoozekrans?style=flat&logo=githubsponsors&color=ea4aaa&label=Sponsor)](https://github.com/sponsors/MarcelRoozekrans)
+
+
 A NuGet package that provides an **in-memory fake SMTP server** with a **real-time web dashboard** for ASP.NET Core applications. Think Hangfire, but for emails.
 
 Perfect for local development and testing — capture emails your app sends without configuring a real mail server.
