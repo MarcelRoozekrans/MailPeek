@@ -2,5 +2,12 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>MarcelRoozekrans/renovate-config"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["Microsoft.AspNetCore.Mvc.Testing"],
+      "allowedVersions": "<10",
+      "description": "MailPeek lib targets net8.0;net9.0. Mvc.Testing 10.x drops net9.0. Hold until repo TFMs move to net10."
+    }
   ]
 }
