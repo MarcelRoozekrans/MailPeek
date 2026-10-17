@@ -1,5 +1,6 @@
 # MailPeek
 
+[![codecov](https://codecov.io/gh/MarcelRoozekrans/MailPeek/graph/badge.svg)](https://codecov.io/gh/MarcelRoozekrans/MailPeek)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/MarcelRoozekrans?style=flat&logo=githubsponsors&color=ea4aaa&label=Sponsor)](https://github.com/sponsors/MarcelRoozekrans)
 
 
