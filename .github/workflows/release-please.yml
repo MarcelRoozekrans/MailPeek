@@ -53,6 +53,13 @@ jobs:
       - name: Test
         run: dotnet test -c Release --no-build
 
+      # A CycloneDX SBOM of the solution, attached to the release that release-please just created.
+      - name: Attach the SBOM to the GitHub release
+        uses: MarcelRoozekrans/ci-baseline/actions/sbom@v1
+        with:
+          solution: MailPeek.slnx
+          tag: ${{ needs.release-please.outputs.tag_name }}
+
       - name: Pack
         run: |
           dotnet pack src/MailPeek/MailPeek.csproj -c Release --no-build -p:PackageVersion=${{ needs.release-please.outputs.version }} -o ./nupkg
