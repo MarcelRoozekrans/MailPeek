@@ -34,7 +34,7 @@ Register GitVersion as a local dotnet tool for local version preview via `dotnet
 
 - Triggers: push to `master`, pull requests
 - Steps: checkout (full history) → setup .NET 8 & 9 → restore tools → GitVersion → build → test → pack → push pre-release to NuGet (master only)
-- NuGet API key from GitHub secret `NUGET_API_KEY`
+- NuGet API key from GitHub secret `NUGET_API_KEY` (superseded: `release-please.yml` now publishes with NuGet trusted publishing, using `NuGet/login` and the `NUGET_USER` repository variable)
 
 ### 5. Release Workflow (`.github/workflows/release.yml`)
 

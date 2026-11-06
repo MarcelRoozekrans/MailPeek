@@ -360,5 +360,5 @@ git commit -m "chore: finalize NuGet publishing setup"
 
 After pushing to GitHub, the repo owner must:
 1. Go to GitHub repo → Settings → Secrets and variables → Actions
-2. Add secret `NUGET_API_KEY` with a NuGet.org API key scoped to push packages
+2. Superseded: instead of a `NUGET_API_KEY` secret, add a trusted publishing policy on nuget.org for workflow `release-please.yml` and set the `NUGET_USER` repository variable
 3. Create a GitHub Release with tag `v0.1.0` to publish the first stable package
