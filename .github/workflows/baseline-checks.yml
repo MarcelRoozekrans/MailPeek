@@ -17,4 +17,7 @@ jobs:
       actions: read
     uses: MarcelRoozekrans/ci-baseline/.github/workflows/baseline.yml@v1
     with:
+      dotnet-version: |
+        10.0.x
+        11.0.x
       solution: MailPeek.slnx

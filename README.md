@@ -211,7 +211,7 @@ The dashboard exposes a REST API under `{prefix}/api/`:
 
 ## Requirements
 
-- .NET 8.0 or .NET 9.0
+- .NET 8.0, .NET 9.0 or .NET 11.0
 
 ## License
 
