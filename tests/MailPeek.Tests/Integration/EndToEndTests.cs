@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Sockets;
 using MailKit.Net.Smtp;
 using MimeKit;
 using Microsoft.AspNetCore.Builder;
@@ -13,7 +15,15 @@ namespace MailPeek.Tests.Integration;
 public class EndToEndTests : IAsyncLifetime
 {
     private IHost? _host;
-    private const int SmtpPort = 12525; // Use high port to avoid conflicts
+    // Each test host picks its own free port: the net9.0 and net11.0 test hosts run in parallel.
+    private readonly int _smtpPort = GetFreePort();
+
+    private static int GetFreePort()
+    {
+        using var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        return ((IPEndPoint)listener.LocalEndpoint).Port;
+    }
 
     public async Task InitializeAsync()
     {
@@ -23,7 +33,7 @@ public class EndToEndTests : IAsyncLifetime
                 webBuilder.UseTestServer();
                 webBuilder.ConfigureServices(services =>
                 {
-                    services.AddMailPeek(opts => opts.Port = SmtpPort);
+                    services.AddMailPeek(opts => opts.Port = _smtpPort);
                 });
                 webBuilder.Configure(app =>
                 {
@@ -53,7 +63,7 @@ public class EndToEndTests : IAsyncLifetime
         message.Body = new TextPart("plain") { Text = "Hello from E2E test" };
 
         using var smtpClient = new MailKit.Net.Smtp.SmtpClient();
-        await smtpClient.ConnectAsync("localhost", SmtpPort, false);
+        await smtpClient.ConnectAsync("localhost", _smtpPort, false);
         await smtpClient.SendAsync(message);
         await smtpClient.DisconnectAsync(true);
 
