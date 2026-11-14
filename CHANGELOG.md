@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.5.2...v0.6.0) (2026-11-14)
+
+
+### Features
+
+* add .NET 11 target ([4b5981c](https://github.com/MarcelRoozekrans/MailPeek/commit/4b5981c9bd1acdb82d181a9b304c8cbc775f41ee))
+
 ## [0.5.2](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.5.1...v0.5.2) (2026-04-15)
 
 
