@@ -9,3 +9,6 @@ obj/
 
 # Test results and coverage reports
 TestResults/
+
+# Per-machine Claude Code settings.
+.claude/settings.local.json
