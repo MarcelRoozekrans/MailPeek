@@ -77,19 +77,21 @@ dotnet test tests/MailPeek.Tests/MailPeek.Tests.csproj -f net11.0
   written by it; there is no `<Version>` in the project files. GitVersion only sets the version of
   CI builds.
 
-<!-- org-core:start sha256=3022fd292033117a25777334465cf8843056c471038e693d18c2272e0bc8044a (generated from docker-nuc scripts/agents-md/org-core-personal.md; do not edit here) -->
+<!-- org-core:start sha256=08a88996bc9165f888fc0260607cfd0670cae128c323e16707c6b452ee66222d (generated from docker-nuc scripts/agents-md/org-core-personal.md; do not edit here) -->
 ## Org rules
 
 These rules hold in every public MarcelRoozekrans repo.
 
 ### Commits and releases
 
-- Conventional Commits. release-please reads them on the default branch: `feat:` and `fix:` cut a
-  release, `docs:`, `chore:`, `ci:`, `test:` and `refactor:` do not. A breaking change needs `!` or
-  a `BREAKING CHANGE:` footer.
+- Conventional Commits. release-please reads them on the default branch, and the changelog sections
+  in `release-please-config.json` decide which types count. The standard: `feat`, `fix`, `perf`,
+  `deps` and `revert` open or update the release PR; `docs`, `test`, `refactor`, `build`, `ci`,
+  `chore` and `style` do not, unless the commit is breaking or has a `Release-As:` footer. The
+  release happens when that PR merges. A breaking change needs `!` or a `BREAKING CHANGE:` footer.
 - A commit body never contains nested parentheses. release-please cannot parse them and silently
   drops the whole commit from the changelog, while the workflow still reports success.
-- After merging a `feat:` or `fix:`, check that the commit appears in the release-please PR.
+- After merging a commit that should release, check that it appears in the release-please PR.
 
 ### Branches and pull requests
 
