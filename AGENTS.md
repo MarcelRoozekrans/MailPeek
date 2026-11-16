@@ -51,7 +51,8 @@ dotnet test tests/MailPeek.Tests/MailPeek.Tests.csproj -f net11.0
 
 - Package references are pinned per `.csproj`; there is no `Directory.Packages.props`. The six
   analyzer packages are listed in all three non-sample projects: bump them in every project at
-  once. `Directory.Build.props` only turns on NuGetAudit.
+  once. `Directory.Build.props` turns on NuGetAudit and embeds the PDB in every DLL; in GitHub
+  Actions it also sets `ContinuousIntegrationBuild` for the shipped projects under `src/`.
 - Analyzer suppressions are narrow and per project: `EPS06` in `MailPeek.csproj`, `MA0004` in the
   test project. Do not add a blanket `NoWarn`; fix the finding instead.
 - `MailPeek` targets net8.0, so library code must compile against the net8.0 API surface. Guard
