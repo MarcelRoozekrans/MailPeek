@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.3](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.5.2...v0.5.3) (2026-11-17)
+
+
+### Features
+
+* add .NET 11 target ([4b5981c](https://github.com/MarcelRoozekrans/MailPeek/commit/4b5981c9bd1acdb82d181a9b304c8cbc775f41ee))
+
+
+### Bug Fixes
+
+* embed PDBs so Go to Definition shows the package source ([098d773](https://github.com/MarcelRoozekrans/MailPeek/commit/098d773995b64a1857c87e2622df9f3219511f3f))
+
 ## [0.5.2](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.5.1...v0.5.2) (2026-04-15)
 
 
