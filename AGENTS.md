@@ -22,8 +22,8 @@ used during local development and in tests to capture outgoing mail. Two NuGet p
 
 ## Build and test
 
-Prerequisites: the .NET 11 SDK, which builds every target including `net11.0`, plus the 10.0
-runtime; CI installs `10.0.x` and `11.0.x`. There is no `global.json`. `dotnet tool restore` installs GitVersion, which CI uses
+Prerequisites: the .NET 11 SDK, which builds every target including `net11.0`, plus the .NET 10.0
+and ASP.NET Core 10.0 runtimes, which the `net10.0` test host needs; CI installs `10.0.x` and `11.0.x`. There is no `global.json`. `dotnet tool restore` installs GitVersion, which CI uses
 for the build and package version.
 
 CI, `.github/workflows/ci.yml`:
