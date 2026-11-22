@@ -7,11 +7,11 @@ used during local development and in tests to capture outgoing mail. Two NuGet p
 
 ## Layout
 
-- Shipped: `src/MailPeek` (net8.0, net9.0, net11.0) and `src/MailPeek.Hosting.Aspire`
-  (net9.0, net11.0). The Aspire package has no project reference to `MailPeek`; the two only meet
+- Shipped: `src/MailPeek` (net10.0, net11.0) and `src/MailPeek.Hosting.Aspire`
+  (net10.0, net11.0). The Aspire package has no project reference to `MailPeek`; the two only meet
   through the connection string named after the resource.
 - Not shipped: `samples/SampleApp` (net11.0, only a manual demo) and `tests/MailPeek.Tests`
-  (net9.0, net11.0). Coverage excludes both, see `coverage.runsettings` and `codecov.yml`.
+  (net10.0, net11.0). Coverage excludes both, see `coverage.runsettings` and `codecov.yml`.
 - `src/MailPeek/Assets/` is the whole dashboard: plain HTML, CSS and JS, embedded into the DLL
   with `<EmbeddedResource Include="Assets\**\*" />`. There is no npm or frontend build step.
   `Assets/js/signalr.min.js` is a vendored, minified third-party file: do not edit or reformat it.
@@ -22,8 +22,8 @@ used during local development and in tests to capture outgoing mail. Two NuGet p
 
 ## Build and test
 
-Prerequisites: the .NET 11 SDK, which builds every target including `net11.0`, plus the 8.0 and
-9.0 runtimes; CI installs `8.0.x`, `9.0.x` and `11.0.x`. There is no `global.json`. `dotnet tool restore` installs GitVersion, which CI uses
+Prerequisites: the .NET 11 SDK, which builds every target including `net11.0`, plus the .NET 10.0
+and ASP.NET Core 10.0 runtimes, which the `net10.0` test host needs; CI installs `10.0.x` and `11.0.x`. There is no `global.json`. `dotnet tool restore` installs GitVersion, which CI uses
 for the build and package version.
 
 CI, `.github/workflows/ci.yml`:
@@ -55,8 +55,8 @@ dotnet test tests/MailPeek.Tests/MailPeek.Tests.csproj -f net11.0
   Actions it also sets `ContinuousIntegrationBuild` for the shipped projects under `src/`.
 - Analyzer suppressions are narrow and per project: `EPS06` in `MailPeek.csproj`, `MA0004` in the
   test project. Do not add a blanket `NoWarn`; fix the finding instead.
-- `MailPeek` targets net8.0, so library code must compile against the net8.0 API surface. Guard
-  newer APIs with `#if` or avoid them.
+- `MailPeek` targets net10.0 and net11.0, so library code must compile against the net10.0 API
+  surface; guard newer APIs with `#if NET11_0_OR_GREATER`.
 - `AddMailPeek(Action<MailPeekSmtpOptions>)` copies each option into `services.Configure` by hand.
   A new property on `MailPeekSmtpOptions` must be added to that copy, or it is silently ignored.
 - The analysis services (`AutoTagger`, `LinkChecker`, `HtmlCompatibilityChecker`, `SpamScorer`,
@@ -72,7 +72,7 @@ dotnet test tests/MailPeek.Tests/MailPeek.Tests.csproj -f net11.0
 - The REST API lives in `Middleware/DashboardApiExtensions.cs`. A new or changed endpoint also
   changes the API table in `README.md` and the calls in `Assets/js/dashboard.js`.
 - Integration tests start a real SMTP listener. Each test host picks a free port with
-  `GetFreePort()`, because the net9.0 and net11.0 test hosts run in parallel; never use a fixed
+  `GetFreePort()`, because the net10.0 and net11.0 test hosts run in parallel; never use a fixed
   port in a test.
 - The release version comes from release-please (`release-type: simple`) and `CHANGELOG.md` is
   written by it; there is no `<Version>` in the project files. GitVersion only sets the version of

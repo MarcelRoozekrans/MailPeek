@@ -15,7 +15,7 @@ namespace MailPeek.Tests.Integration;
 public class EndToEndTests : IAsyncLifetime
 {
     private IHost? _host;
-    // Each test host picks its own free port: the net9.0 and net11.0 test hosts run in parallel.
+    // Each test host picks its own free port: the net10.0 and net11.0 test hosts run in parallel.
     private readonly int _smtpPort = GetFreePort();
 
     private static int GetFreePort()
