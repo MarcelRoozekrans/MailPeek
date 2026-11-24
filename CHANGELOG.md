@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.6.0](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.5.2...v0.6.0) (2026-11-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* the net8.0 and net9.0 target frameworks are removed from MailPeek, and net9.0 from MailPeek.Hosting.Aspire. Projects on .NET 8 or 9 stay on the 0.5.x line.
+
+### Features
+
+* add .NET 11 target ([4b5981c](https://github.com/MarcelRoozekrans/MailPeek/commit/4b5981c9bd1acdb82d181a9b304c8cbc775f41ee))
+* target net10.0 and net11.0, drop net8.0 and net9.0 ([#266](https://github.com/MarcelRoozekrans/MailPeek/issues/266)) ([0c80010](https://github.com/MarcelRoozekrans/MailPeek/commit/0c80010789a333b1260e6c9e0bf140ec9fe4a6de))
+
+
+### Bug Fixes
+
+* embed PDBs so Go to Definition shows the package source ([098d773](https://github.com/MarcelRoozekrans/MailPeek/commit/098d773995b64a1857c87e2622df9f3219511f3f))
+
 ## [0.5.2](https://github.com/MarcelRoozekrans/MailPeek/compare/v0.5.1...v0.5.2) (2026-04-15)
 
 
